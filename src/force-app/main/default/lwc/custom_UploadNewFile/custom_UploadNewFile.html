@@ -1,4 +1,6 @@
 <template>
+    <div class="externalbox">
+            <div class="uploadbuttonbox">
     <lightning-file-upload
         label="Attach receipt"
         name="fileUploader"
@@ -8,4 +10,18 @@
         multiple
     >
     </lightning-file-upload>
+</div>
+    <div class="progressindicatorbox">
+    <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
+        <template for:each={uploadSteps} for:item="step">
+            <template key={step.label} if:true={step.show}>
+            <lightning-progress-step label={step.label} value={step.value} key={step.label}></lightning-progress-step>
+            </template>
+        </template>
+    </lightning-progress-indicator>
+    <lightning-button label="Next" onclick={toggleStep4}></lightning-button>
+    <lightning-button label="Hide CSV" onclick={hideCsv}></lightning-button>
+
+</div>
+</div>  
 </template>

@@ -1,0 +1,15 @@
+.externalbox{
+    /** only for experimental*/
+    margin-left: 25%;
+    margin-top: 25%;
+    /** only for experimental*/
+    width: 50% ;
+    align-content: center;
+    text-align: center;
+}   
+.uploadbuttonbox{
+    margin: 5%;
+}
+.progressindicatorbox{
+    margin: 5%;
+}

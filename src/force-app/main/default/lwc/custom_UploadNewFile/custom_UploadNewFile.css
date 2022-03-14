@@ -6,10 +6,23 @@
     width: 50% ;
     align-content: center;
     text-align: center;
+    background-color: white;
 }   
 .uploadbuttonbox{
     margin: 5%;
 }
 .progressindicatorbox{
     margin: 5%;
+}
+
+.pills{
+    margin: 1%;
+}
+.imagepreview{
+    width: 30%;
+    height: auto;
+}
+
+.whitebutton{
+    --sds-c-icon-color-foreground-default: white;
 }

@@ -4,6 +4,8 @@ import { LightningElement, api, track } from 'lwc';
 export default class Custom_UploadNewFile extends LightningElement {
     supportedImgs = ['png','jpg', 'jpeg'];
     supportedCsvs = ['csv']
+    @track isPdf = false;
+    showPreview = false;
     @track dataTableColumns = [];
     @track isImg = false;
     @track isCsv = false;
@@ -30,78 +32,78 @@ export default class Custom_UploadNewFile extends LightningElement {
         const uploadedFiles = event.detail.files;
         alert('No. of files uploaded : ' + uploadedFiles.length);
     }
+    togglePreview(type, file){
+        switch(type){
+            case 'img':
+                this.isImg = true;
+                this.previewFile = URL.createObjectURL(file);
+                break;
+            case 'pdf':
+                this.previewFile = URL.createObjectURL(file);
+                this.isPdf = true;
+                break;
+            case 'csv':
+                this.previewFile = true;
+                this.isCsv = true;
+                break;
+        }
+    }
 
     onChangeFiles(event){
             this.removeFile(); // clear all setup 
             console.log(event.target.files[0].name);
-            
-            
             console.log(this.supportedImgs);
-            var fileExt = this.storeFile(event.target.files);
+
+            var fileExt = this.verifyExtension(event.target.files);
             console.log(fileExt);
+            var file = event.target.files[0];
             switch (fileExt){
                 case 'img':
-                    this.setPreviewIMG(event.target.files[0]);
+                    this.togglePreview('img', file);
                     break;
             
                 case 'csv':
-                    this.previewFile = true;
-                    this.isCsv = true;
-                    this.isImg = false;
                     console.log('csv');
-                    let newPromise = new Promise((resolve, reject) => {
-                        var reader = new FileReader();
-                        reader.onload = function () {
-                            resolve(reader.result);
-                        };
-                        reader.readAsText(event.target.files[0]);
-                    })
-                    .then(result => {
-                        console.log("this.csvString : " + result);
-                        console.log("csvList");
-                        var csvList = [];
-                        csvList = result.toString().split('\n');
-                        
-                        console.log(csvList);
-                        var tst = this.convertCSVToDT(csvList);
-
-                        
-                        
-                    })
-                    .catch(error => {
-                        console.log(error.message.body);
-                    });
+                    this.togglePreview('csv', file);
+                    this.renderCsvFileToText(event);
                     break;
                 case 'pdf':
-                    this.setPreviewPDF(event.target.files[0])
+                    this.togglePreview('pdf', file);
                     break;
                 default:
-                    var src = null;
                     this.previewFile = null;
+                    this.src = null;
                     break;
             }
-            
-            // var preview = document.getElementById("imagepreview");
-            // preview.src = src;
-            //preview.style.display = "block";
-    }
-    
-    @track isPdf = false;
-    setPreviewPDF(file){
-        this.isImg = false;
-        this.isCsv = false;
-        this.isPdf = true;
-        var src = URL.createObjectURL(file);
-        this.previewFile = src;
     }
 
-    setPreviewIMG(file){
-        this.isImg = true;
-        this.isCsv = false;
-        var src = URL.createObjectURL(file);
-        this.previewFile = src;
+    renderCsvFileToText(event){
+        let newPromise = new Promise((resolve, reject) => {
+            var reader = new FileReader();
+            reader.onload = function () {
+                resolve(reader.result);
+            };
+            reader.readAsText(event.target.files[0]);
+        })
+        .then(result => {
+            console.log("this.csvString : " + result);
+            console.log("csvList");
+            var csvList = [];
+            csvList = result.toString().split('\n');
+            
+            console.log(csvList);
+            var tst = this.convertCSVToDT(csvList);         
+        })
+        .catch(error => {
+            console.log(error.message.body);
+        });
     }
-    storeFile(files){
+
+   
+
+
+    /**  */
+    verifyExtension(files){
         console.log('start StoreFile');
         this.fileName = files[0].name.toLowerCase();
         this.fileUploaded = files;
@@ -119,11 +121,11 @@ export default class Custom_UploadNewFile extends LightningElement {
             return 'img';
         }else if(isCsv){
             return 'csv';
-        }else{
+        }else if(isPdf){
             return 'pdf';
         }
 
-        return isImg;
+        return 'unknown';
 
     }
     goToNextStep(){
@@ -152,10 +154,10 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.fileName = null;
         this.attachedFile = false;
         this.previewFile = null;
-        this.isCsv = true;
-        this.isImg = true;
+        this.isCsv = false;
+        this.isImg = false;
+        this.isPdf = false;
     }
-    showPreview = false;
 
     previewImg(){
         if(!this.previewFile){

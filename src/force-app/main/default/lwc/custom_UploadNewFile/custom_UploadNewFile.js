@@ -72,6 +72,9 @@ export default class Custom_UploadNewFile extends LightningElement {
                         console.log(error.message.body);
                     });
                     break;
+                case 'pdf':
+                    this.setPreviewPDF(event.target.files[0])
+                    break;
                 default:
                     var src = null;
                     this.previewFile = null;
@@ -81,6 +84,15 @@ export default class Custom_UploadNewFile extends LightningElement {
             // var preview = document.getElementById("imagepreview");
             // preview.src = src;
             //preview.style.display = "block";
+    }
+    
+    @track isPdf = false;
+    setPreviewPDF(file){
+        this.isImg = false;
+        this.isCsv = false;
+        this.isPdf = true;
+        var src = URL.createObjectURL(file);
+        this.previewFile = src;
     }
 
     setPreviewIMG(file){
@@ -100,10 +112,15 @@ export default class Custom_UploadNewFile extends LightningElement {
 
         var isImg = this.supportedImgs.some(img => fileExt.includes(img));
         var isCsv = this.supportedCsvs.some(csv => fileExt.includes(csv));
+        var isPdf = fileExt == 'pdf';
+        console.log('isPdf ' + isPdf);
+
         if(isImg){
             return 'img';
         }else if(isCsv){
             return 'csv';
+        }else{
+            return 'pdf';
         }
 
         return isImg;

@@ -6,6 +6,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     supportedCsvs = ['csv']
     @track isPdf = false;
     showPreview = false;
+    fileMaxSize = 5000000;
     @track dataTableColumns = [];
     @track isImg = false;
     @track isCsv = false;
@@ -32,6 +33,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         const uploadedFiles = event.detail.files;
         alert('No. of files uploaded : ' + uploadedFiles.length);
     }
+
     togglePreview(type, file){
         switch(type){
             case 'img':
@@ -48,15 +50,24 @@ export default class Custom_UploadNewFile extends LightningElement {
                 break;
         }
     }
-
+    checkFileSize(file){
+        return file.size > this.fileMaxSize;
+    }
     onChangeFiles(event){
+            var file = event.target.files[0];
+            if(this.checkFileSize(file)){
+                console.log('max size exceeded');
+                alert('Maximum file size exceeded ' + this.fileMaxSize/1000000 + ' MB');
+                return;
+            }
             this.removeFile(); // clear all setup 
             console.log(event.target.files[0].name);
             console.log(this.supportedImgs);
 
             var fileExt = this.verifyExtension(event.target.files);
             console.log(fileExt);
-            var file = event.target.files[0];
+            console.log('file');
+            console.log(file);
             switch (fileExt){
                 case 'img':
                     this.togglePreview('img', file);

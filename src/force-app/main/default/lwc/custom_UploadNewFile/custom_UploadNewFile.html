@@ -1,7 +1,24 @@
 <template>
     <div class="externalbox">
-        <c-custom_dyn-look-up>
-        </c-custom_dyn-look-up>
+        
+            
+        <div class="slds-box" style="position: static;">
+            <lightning-combobox
+            name="progress"
+            label="Status"
+            value={value}
+            placeholder="Select Entity Type"
+            options={entityOptions}
+            onchange={changeEntity} >
+        </lightning-combobox>
+            <c-custom_dyn-look-up 
+                placeholder="Search" 
+                objectconfig ={ObjectConfig}
+                onlookup={handleAccountChange}
+                oninputchange={handlesearchInputChange}
+                label-name="contact/company">
+            </c-custom_dyn-look-up>
+        </div>
             <div class="uploadbuttonbox">
     <!-- <lightning-file-upload
         label="Attach receipt"

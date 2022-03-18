@@ -221,4 +221,49 @@ export default class Custom_UploadNewFile extends LightningElement {
 
         return 'testReturn';
     }
+
+    /** LOOK UP SETUP */
+    // better option with custom metadata type
+    ObjectConfig = [ //Array of objects
+        {
+            'label':  'Contact', 
+            'APIName': 'Contact', 
+            'fields':'Name,FirstName,LastName,Email,Phone',
+            'displayFields':'Name,Phone,Email', 
+            'iconName': 'standard:contact',
+            'FilterCondition' : 'AccountId != NULL',
+            'enable' : true
+        },
+        {
+            'label':  'Account', 
+            'APIName': 'Account', 
+            'fields':'Name',
+            'displayFields':'Name,AnnualRevenue,AccountNumber', 
+            'iconName': 'standard:account',  
+            'FilterCondition' : 'AccountNumber != NULL',
+            'enable' : true
+        }
+    ];
+    handleAccountChange(event){
+        console.log('***In handleAccountChange**');
+        console.log(event.detail.data.recordId);
+    }
+
+    handlesearchInputChange(event){
+        console.log('***In handlesearchInputChange**');
+    }
+    
+    /** ENTITY */
+    get entityOptions(){
+        var returnObj = [];
+        for(const obj in this.ObjectConfig){
+            console.log(obj.label + obj.APIName);
+            returnObj.push({ label: this.ObjectConfig[obj].label, value: this.ObjectConfig[obj].APIName});
+        }
+
+        return returnObj;
+    }
+    changeEntity(event){
+        console.log(event.target.value);
+    }
 }

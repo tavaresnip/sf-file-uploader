@@ -7,6 +7,8 @@ export default class Custom_UploadNewFile extends LightningElement {
     @track isPdf = false;
     showPreview = false;
     fileMaxSize = 5000000;
+    /** ENTITY */
+    @track entityOptions;
     @track dataTableColumns = [];
     @track isImg = false;
     @track isCsv = false;
@@ -232,7 +234,8 @@ export default class Custom_UploadNewFile extends LightningElement {
             'displayFields':'Name,Phone,Email', 
             'iconName': 'standard:contact',
             'FilterCondition' : 'AccountId != NULL',
-            'enable' : true
+            'enabled' : true,
+            'selected' : true
         },
         {
             'label':  'Account', 
@@ -241,7 +244,8 @@ export default class Custom_UploadNewFile extends LightningElement {
             'displayFields':'Name,AnnualRevenue,AccountNumber', 
             'iconName': 'standard:account',  
             'FilterCondition' : 'AccountNumber != NULL',
-            'enable' : true
+            'enabled' : true,
+            'selected' : true
         }
     ];
     handleAccountChange(event){
@@ -252,18 +256,39 @@ export default class Custom_UploadNewFile extends LightningElement {
     handlesearchInputChange(event){
         console.log('***In handlesearchInputChange**');
     }
+    connectedCallback(){
+        this.getEntityOptions();
+    }
     
-    /** ENTITY */
-    get entityOptions(){
+    getEntityOptions(){
         var returnObj = [];
+        returnObj.push({ label: 'All list', value: 'all'});
         for(const obj in this.ObjectConfig){
             console.log(obj.label + obj.APIName);
             returnObj.push({ label: this.ObjectConfig[obj].label, value: this.ObjectConfig[obj].APIName});
         }
 
-        return returnObj;
+        this.entityOptions = returnObj;
     }
     changeEntity(event){
         console.log(event.target.value);
+        console.log(this.entityOptions);
+        var allOption = this.entityOptions[0].value;
+        console.log(allOption);
+        for(const option in this.ObjectConfig){
+            var itOption = this.ObjectConfig[option].APIName;
+            console.log('itOption ' + itOption);
+            if(event.target.value == allOption){
+                this.ObjectConfig[option].selected = true;
+            }else{ 
+                if(itOption == event.target.value){
+                    this.ObjectConfig[option].selected = true;
+                }else{
+                    this.ObjectConfig[option].selected = false;
+                }
+            }
+        }
+
+        console.log(JSON.stringify(this.ObjectConfig));
     }
 }

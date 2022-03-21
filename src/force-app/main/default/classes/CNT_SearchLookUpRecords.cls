@@ -14,7 +14,13 @@ public with sharing class CNT_SearchLookUpRecords {
             Map<String, String> mapofObjectAPILabel = new Map<String, String>();
 
             for(object obj : objectfieldMap){
+                
                 Map<String,Object> data = (Map<String,Object>)obj;
+                Boolean enabled = (Boolean)data.get('enabled');
+                Boolean selected = (Boolean)data.get('selected');
+
+                System.debug('isEnabled : ' + enabled);
+                if(!enabled || !selected) continue;
                 system.debug('***data***'+data);
 
                 String combinedFields = data.get('fields') + ',' + data.get('displayFields');

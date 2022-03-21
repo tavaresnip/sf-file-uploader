@@ -105,11 +105,14 @@ export default class Custom_dynLookUp extends LightningElement {
             composed   : true,
             cancelable : true,
             detail: {  
-                record ,
-                recordId,
-                currentRecordId : this.currentRecordId
+                data: {
+                    record,
+                    recordId,
+                    currentRecordId : this.currentRecordId
+                }
             }
         });
+        console.log('teste');
         this.dispatchEvent(selectedEvent);
     }
 }

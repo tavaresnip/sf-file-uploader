@@ -223,7 +223,7 @@ export default class Custom_UploadNewFile extends LightningElement {
 
         return 'testReturn';
     }
-
+    
     /** LOOK UP SETUP */
     // better option with custom metadata type
     ObjectConfig = [ //Array of objects
@@ -244,6 +244,16 @@ export default class Custom_UploadNewFile extends LightningElement {
             'displayFields':'Name,AnnualRevenue,AccountNumber', 
             'iconName': 'standard:account',  
             'FilterCondition' : 'AccountNumber != NULL',
+            'enabled' : true,
+            'selected' : true
+        },
+        {
+            'label':  'User', 
+            'APIName': 'User', 
+            'fields':'Name,FirstName,LastName,Email',
+            'displayFields':'Name,Username', 
+            'iconName': 'standard:user',
+            'FilterCondition' : 'IsActive = true',
             'enabled' : true,
             'selected' : true
         }
@@ -290,5 +300,10 @@ export default class Custom_UploadNewFile extends LightningElement {
         }
 
         console.log(JSON.stringify(this.ObjectConfig));
+    }
+    assignSelected = 'me';
+    onSelectAssignment(event){
+        console.log('ONSELECTASSIGNMENT : ' + JSON.stringify(event.detail.selected));
+        // this.assignSelected = event.detal.selected;
     }
 }

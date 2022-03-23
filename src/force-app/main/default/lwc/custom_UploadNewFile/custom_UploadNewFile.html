@@ -1,16 +1,18 @@
 <template>
     <div class="externalbox">
-        <c-custom_assign-file onselect={onSelectAssignment}></c-custom_assign-file>
+        <c-custom_assign-file  onselect={onSelectAssignment}></c-custom_assign-file>
             
-        <div class="slds-box" style="position: static;">
+        <div  if:true={showLookUp} class="slds-box" style="position: static;">
             <lightning-combobox
-            name="progress"
-            label="Status"
-            value={value}
+            id="entity"
+            name="entity"
+            label="Entity Type"
+            value={entityValue}
             placeholder="Select Entity Type"
             options={entityOptions}
-            onchange={changeEntity} >
-        </lightning-combobox>
+            onchange={changeEntity}
+            disabled={disableEntity} >
+            </lightning-combobox>
             <c-custom_dyn-look-up 
                 placeholder="Search" 
                 objectconfig ={ObjectConfig}
@@ -20,16 +22,7 @@
             </c-custom_dyn-look-up>
         </div>
             <div class="uploadbuttonbox">
-    <!-- <lightning-file-upload
-        label="Attach receipt"
-        name="fileUploader"
-        accept={acceptedFormats}
-        record-id={myRecordId}
-        onuploadfinished={handleUploadFinished}
-        onchange={onChangeFiles}
-        multiple
-    >
-    </lightning-file-upload> -->
+    
     <div class="slds-align_absolute-center">
         <lightning-input type="file" label="Upload File" accept={acceptedFormats}
           onchange={onChangeFiles}>
@@ -40,7 +33,8 @@
         <lightning-icon size="x-small" icon-name="utility:close" alternative-text="Remove" title="Remove" onclick={removeFile}></lightning-icon>
         <span class="slds-pill__label">{fileName}</span>
         <span class="slds-assistive-text">Remove</span>
-        
+        <p></p>
+        <lightning-button label="Save" onclick={saveFile}></lightning-button>
     </div>
     </template>
 </div>

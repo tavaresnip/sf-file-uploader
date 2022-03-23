@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-
+import attachFile from '@salesforce/apex/CNT_SearchLookUpRecords.attachFile';
 
 export default class Custom_UploadNewFile extends LightningElement {
     supportedImgs = ['png','jpg', 'jpeg'];
@@ -8,6 +8,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     showPreview = false;
     fileMaxSize = 5000000;
     /** ENTITY */
+    showLookUp = false;
     @track entityOptions;
     @track dataTableColumns = [];
     @track isImg = false;
@@ -57,6 +58,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     }
     onChangeFiles(event){
             var file = event.target.files[0];
+            this.store64File(file);
             if(this.checkFileSize(file)){
                 console.log('max size exceeded');
                 alert('Maximum file size exceeded ' + this.fileMaxSize/1000000 + ' MB');
@@ -89,7 +91,14 @@ export default class Custom_UploadNewFile extends LightningElement {
                     break;
             }
     }
+    base64;
+    store64File(file){
+        var reader = new FileReader();
 
+        reader.onload = () => {
+            this.base64 = reader.result.split(',')[1];
+        }
+    }
     renderCsvFileToText(event){
         let newPromise = new Promise((resolve, reject) => {
             var reader = new FileReader();
@@ -281,17 +290,22 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.entityOptions = returnObj;
     }
     changeEntity(event){
-        console.log(event.target.value);
-        console.log(this.entityOptions);
+        console.log(event.target.id);
+        console.log(this.entityOptions);  
+        this.updateEntitySelection(event.target.value);
+    }
+
+    updateEntitySelection(entitySelected){
+        
         var allOption = this.entityOptions[0].value;
         console.log(allOption);
         for(const option in this.ObjectConfig){
             var itOption = this.ObjectConfig[option].APIName;
             console.log('itOption ' + itOption);
-            if(event.target.value == allOption){
+            if(entitySelected == allOption){
                 this.ObjectConfig[option].selected = true;
             }else{ 
-                if(itOption == event.target.value){
+                if(itOption == entitySelected){
                     this.ObjectConfig[option].selected = true;
                 }else{
                     this.ObjectConfig[option].selected = false;
@@ -304,6 +318,46 @@ export default class Custom_UploadNewFile extends LightningElement {
     assignSelected = 'me';
     onSelectAssignment(event){
         console.log('ONSELECTASSIGNMENT : ' + JSON.stringify(event.detail.selected));
+        this.toggleAssignment(event.detail.selected);
         // this.assignSelected = event.detal.selected;
+    }
+    disableEntity = false;
+    @track entityValue;
+    toggleAssignment(assign){
+        console.log('assign type ' + assign);
+        switch (assign){
+            case 'user':
+                var user = 'User';
+                this.showLookUp = true;
+                this.disableEntity = true;
+                this.updateEntitySelection(user);
+                this.entityValue = user;
+                // var event = new Event('change');
+                // target.dispatchEvent(event);
+                break;
+            case 'me':
+                this.showLookUp = false;
+                this.disableEntity = true;
+                break;
+            case 'record':
+                var all = 'all';
+                this.updateEntitySelection(all);
+                this.entityValue = all;
+                this.showLookUp = true;
+                this.disableEntity = false;
+                break;
+            default:
+                break;
+        }
+    }
+
+    saveFile(){
+        
+        bas64 = this.base64;
+        fileName = this.fileName;
+        recordId = this.recordId;
+        attachFile({ base64 , fileName , recordId}).then(result=>{
+            console.log('success');
+        }).catch();
     }
 }

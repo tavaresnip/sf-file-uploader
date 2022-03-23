@@ -102,4 +102,13 @@ public without sharing class CNT_SearchLookUpRecords {
             return jsonData;
         
     }
+
+    @AuraEnabled
+    public static string attachFile(String base64, String filename, String recordId){
+        System.debug('base64' + base64);
+        System.debug('filename' + filename);
+        System.debug('recordId' + recordId);
+
+        return '';
+    }
 }

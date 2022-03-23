@@ -20,8 +20,8 @@
                                 <template for:each={searchRecords} for:item="record">
                                     <li key={record.Id} onclick={handleSelect} data-record-id={record.Id} role="presentation" data-name={record.Name}>
                                         <span class="slds-lookup__item-action slds-lookup__item-action--label" role="option">
-                                            <lightning-icon class="slds-icon slds-icon--small slds-icon-text-default" icon-name={record.ICONName} size="small"></lightning-icon>
-                                            <span class="slds-truncate">{record.FIELD0}<br/>
+                                            <lightning-icon icon-name={record.ICONName}  alternative-text="Account" title="Account" size="small" ></lightning-icon>
+                                            <span class="slds-truncate" style="margin-left: 15px;">{record.FIELD0}<br/>
                                                 <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
                                                 {record.Type} • {record.FIELD1} &nbsp; {record.FIELD2}
                                                 </span>

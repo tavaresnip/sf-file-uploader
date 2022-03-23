@@ -1,7 +1,8 @@
-public with sharing class CNT_SearchLookUpRecords {
+public without sharing class CNT_SearchLookUpRecords {
     @AuraEnabled(cacheable=True)
     public static string searchObjects(String objectsConfig, Object searchTerm){
-        
+            System.debug([SELECT Id FROM Contact LIMIT 5]);
+            
             String searchKeyword = searchTerm + '*';
             String returningQuery = '';
             List<Object> objectfieldMap = (List<Object>) JSON.deserializeUntyped(objectsConfig);

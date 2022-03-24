@@ -104,11 +104,67 @@ public without sharing class CNT_SearchLookUpRecords {
     }
 
     @AuraEnabled
-    public static string attachFile(String base64, String filename, String recordId){
+    public static string attachFile(Map<String, Object> params){
+        System.debug(params);
+        String base64 = (String)params.get('base64');
+        String filename = (String)params.get('fileName');
+        String recordId = (String)params.get('recordId');
+        String fileId = (String)params.get('fileId');
+
         System.debug('base64' + base64);
-        System.debug('filename' + filename);
+        System.debug('fileName' + filename);
         System.debug('recordId' + recordId);
 
-        return '';
+        ContentVersion cv = createContentVersion(base64, fileName, fileId);
+        if(UserInfo.getUserId() != recordId){
+            System.debug('im not the owner');
+            ContentDocumentLink cdl = createContentDocumentLink(cv.Id, recordId);
+            if (cv == null || cdl == null) { return null; }
+            return cdl.Id;
+        }
+        
+        return null;
+        
+    }
+    @AuraEnabled
+    public static ContentDocumentLink createContentDocumentLink(Id contentVersionId, Id recordId){
+            ContentDocumentLink cdl = new ContentDocumentLink();
+            ContentVersion cv = [SELECT ContentDocumentId FROM ContentVersion WHERE Id =: contentVersionId];
+            System.debug( cv.Id);
+
+            System.debug( cv.ContentDocumentId);
+            cdl.ContentDocumentId = cv.ContentDocumentId;
+            cdl.LinkedEntityId = recordId;
+            // V = Viewer, C = Collaborator, I = Inferred
+            cdl.Visibility = 'Allusers';
+            cdl.ShareType = 'I';
+            insert cdl;
+            return cdl;
+        
+    }
+
+    @AuraEnabled
+    public static ContentVersion createContentVersion(String base64, String fileName, String fileId){
+        try {
+            ContentVersion cv = new ContentVersion();
+            
+            cv.VersionData = EncodingUtil.base64Decode(base64);
+            cv.ContentDocumentId = fileId;
+            cv.ContentLocation = 'S';
+            cv.Title = fileName;
+            cv.PathOnClient = fileName;
+            cv.IsMajorVersion = true;
+            insert cv;
+            return cv;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static uploaderCmpSettings__c getComponentSettings(){
+        uploaderCmpSettings__c settings = uploaderCmpSettings__c.getInstance();
+
+        return settings;
     }
 }

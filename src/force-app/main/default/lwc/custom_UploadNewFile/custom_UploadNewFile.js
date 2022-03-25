@@ -1,6 +1,7 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import attachFile from '@salesforce/apex/CNT_SearchLookUpRecords.attachFile';
-
+import userId from '@salesforce/user/Id';
+import getSettings from '@salesforce/apex/CNT_SearchLookUpRecords.getComponentSettings';
 export default class Custom_UploadNewFile extends LightningElement {
     supportedImgs = ['png','jpg', 'jpeg'];
     supportedCsvs = ['csv']
@@ -27,10 +28,15 @@ export default class Custom_UploadNewFile extends LightningElement {
     ]
     @api myRecordId;
     @track currentStep = 0;
-    get acceptedFormats() {
-        return ['.pdf', '.png'];
+    //@track acceptedFormats = ['.png'];
+    get acceptedFormats(){
+            if(this.settings.data){
+                console.log(JSON.stringify(this.settings.data));
+                return this.settings.data.acceptedFormats__c.split(',');
+            }
+        return [];
     }
-
+    @track settings;
     handleUploadFinished(event) {
         // Get the list of uploaded files
         const uploadedFiles = event.detail.files;
@@ -93,11 +99,14 @@ export default class Custom_UploadNewFile extends LightningElement {
     }
     base64;
     store64File(file){
-        var reader = new FileReader();
-
+        var reader = new FileReader()
         reader.onload = () => {
-            this.base64 = reader.result.split(',')[1];
+            console.log(reader.result.split(',')[0]);
+            this.base64 = reader.result.split(',')[1]
+            
+            console.log(this.base64)
         }
+        reader.readAsDataURL(file)
     }
     renderCsvFileToText(event){
         let newPromise = new Promise((resolve, reject) => {
@@ -184,7 +193,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     previewImg(){
         if(!this.previewFile){
             
-            alert('You need to select a file');
+            alert('You need to select a file or file format not supported');
             return;
         }
         console.log(this.previewFile);
@@ -265,20 +274,40 @@ export default class Custom_UploadNewFile extends LightningElement {
             'FilterCondition' : 'IsActive = true',
             'enabled' : true,
             'selected' : true
+        }, 
+        {
+            'label':  'Content Document', 
+            'APIName': 'ContentDocument', 
+            'fields':'Description,FileExtension',
+            'displayFields':'Title,FileType', 
+            'iconName': 'standard:document',
+            'FilterCondition' : 'Title != NULL',
+            'enabled' : true,
+            'selected' : true
         }
     ];
     handleAccountChange(event){
         console.log('***In handleAccountChange**');
         console.log(event.detail.data.recordId);
+        this.recordId = event.detail.data.recordId;
     }
 
     handlesearchInputChange(event){
         console.log('***In handlesearchInputChange**');
     }
+    constructor(){
+        super();
+    }
     connectedCallback(){
         this.getEntityOptions();
+        this.recordId = userId;
     }
-    
+    @wire( getSettings ) settings;
+
+    setupSettings(){
+        console.log(JSON.stringify(this.settings));
+
+    }
     getEntityOptions(){
         var returnObj = [];
         returnObj.push({ label: 'All list', value: 'all'});
@@ -332,12 +361,12 @@ export default class Custom_UploadNewFile extends LightningElement {
                 this.disableEntity = true;
                 this.updateEntitySelection(user);
                 this.entityValue = user;
-                // var event = new Event('change');
-                // target.dispatchEvent(event);
+                this.recordId = null;
                 break;
             case 'me':
                 this.showLookUp = false;
                 this.disableEntity = true;
+                this.recordId = userId;
                 break;
             case 'record':
                 var all = 'all';
@@ -345,19 +374,67 @@ export default class Custom_UploadNewFile extends LightningElement {
                 this.entityValue = all;
                 this.showLookUp = true;
                 this.disableEntity = false;
+                this.recordId = null;
                 break;
             default:
+                this.recordId = userId;
                 break;
         }
     }
 
     saveFile(){
-        
-        bas64 = this.base64;
-        fileName = this.fileName;
-        recordId = this.recordId;
-        attachFile({ base64 , fileName , recordId}).then(result=>{
+        if(userId != '0053h000003TLK1AAO') {
+            console.log('saveFile blocked');
+            return;
+        }
+        console.log('this.fileName ' + this.fileName);
+        console.log('this.recordId ' + this.recordId);
+        const parms = {
+            base64: this.base64,
+            fileName: this.fileName,
+            recordId: this.recordId,
+            fileId: this.fileId
+        };
+
+        attachFile({ 
+            params: parms
+        }).then(result=>{
             console.log('success');
-        }).catch();
+            console.log(JSON.stringify(result));
+        });
     }
+
+    replaceObject = [ //Array of objects
+        {
+            'label':  'Content Document', 
+            'APIName': 'ContentDocument', 
+            'fields':'Description,FileExtension',
+            'displayFields':'Title,FileType', 
+            'iconName': 'standard:document',
+            'FilterCondition' : 'Title != NULL',
+            'enabled' : true,
+            'selected' : true
+        }
+    ];
+    showReplaceFile = false;
+    toggleReplaceFile(event){
+        console.log(event.target.value);
+    
+
+    }
+    handleReplaceChange(event){
+        console.log('handleReplaceChange');
+        this.fileId = event.detail.data.recordId;
+        console.log(this.fileId);
+
+    }
+
+    handleSearchReplace(){
+        console.log('handleSearchReplace');
+    }
+    toggleMatchTitle(event){
+        console.log(this.disableReplace);
+        this.disableReplace = !this.disableReplace;
+    }
+    @track disableReplace = false;
 }

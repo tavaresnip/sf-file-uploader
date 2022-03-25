@@ -6,6 +6,7 @@ export default class Custom_dynLookUp extends LightningElement {
     @api currentRecordId;
     @api placeholder;
     @api labelName;
+    @api disabled = false;
     error;
     searchTerm;
     delayTimeout;

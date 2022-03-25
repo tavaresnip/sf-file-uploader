@@ -161,7 +161,7 @@ public without sharing class CNT_SearchLookUpRecords {
         }
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable = true)
     public static uploaderCmpSettings__c getComponentSettings(){
         uploaderCmpSettings__c settings = uploaderCmpSettings__c.getInstance();
 

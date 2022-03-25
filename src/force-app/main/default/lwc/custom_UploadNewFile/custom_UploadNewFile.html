@@ -29,15 +29,30 @@
         </lightning-input>
     </div>
     <template if:true={attachedFile}>
-    <div class="pills" >
+    <div class="pills">
         <lightning-icon size="x-small" icon-name="utility:close" alternative-text="Remove" title="Remove" onclick={removeFile}></lightning-icon>
         <span class="slds-pill__label">{fileName}</span>
         <span class="slds-assistive-text">Remove</span>
+        
         <p></p>
         <lightning-button label="Save" onclick={saveFile}></lightning-button>
+
+        <lightning-input type="toggle" label="Required option" name="input2" onchange={toggleReplaceFile} ></lightning-input>
+        <!-- <lightning-input type="checkbox" label="Match file by Title" name="matchFile" value={disableReplace} onchange={toggleMatchTitle}></lightning-input> -->
+
+        <div  if:true={showReplaceFile} class="slds-box" style="position: static;">
+            <c-custom_dyn-look-up 
+                placeholder="Search" 
+                objectconfig ={replaceObject}
+                onlookup={handleReplaceChange}
+                oninputchange={handleSearchReplace}
+                label-name="Replace"
+                disabled={disableReplace}>
+            </c-custom_dyn-look-up>
+        </div>
     </div>
     </template>
-</div>
+            </div>
     <div class="progressindicatorbox">
     <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
         <template for:each={uploadSteps} for:item="step">

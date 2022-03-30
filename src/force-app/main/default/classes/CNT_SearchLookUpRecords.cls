@@ -123,7 +123,7 @@ public without sharing class CNT_SearchLookUpRecords {
             return cdl.Id;
         }
         
-        return null;
+        return cv.Id;
         
     }
     @AuraEnabled

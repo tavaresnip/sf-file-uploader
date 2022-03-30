@@ -1,7 +1,7 @@
 import { LightningElement, track } from 'lwc';
 
 export default class Custom_assignFile extends LightningElement {
-
+    
     buttonIconStatefulState = false;
     @track meVariant = 'brand';
     @track userVariant = 'neutral';

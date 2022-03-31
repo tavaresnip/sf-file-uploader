@@ -1,0 +1,7 @@
+.borderbutton{
+  border: 1px solid rgb(206, 206, 206);
+  display: inline-block;
+  padding: 3px;
+  border-radius: 8px;
+  /* background-color: rgb(242, 242, 242); */
+}

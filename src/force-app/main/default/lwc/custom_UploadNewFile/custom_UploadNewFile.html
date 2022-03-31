@@ -1,60 +1,49 @@
 <template>
     <div class="external-card">
         <div class="externalbox">
+            <!-- M A I N   - C A R D -->
             <lightning-card title="Advanced File Import Wizard">
+                
                 <!-- FIRST STEP - SELECT FILE -->
-                <div if:true={firstStep} data-name="firststep">
+                <div if:true={visibleSteps.firstStep} data-name="firststep">
                     <div class="tst">
-                        <!-- SELECT ASSIGNMENT TYPE -->
-                        <!--<div class="" style="display: flex; background-color: red;">
-                            <c-custom_assign-file  onselect={onSelectAssignment}></c-custom_assign-file> 
-                            </div> -->
-                    
+
                         <!-- UPLOAD BOX -->
                         <div class="uploadbuttonbox">
                             <!-- UPLOAD INPUT FIELD -->
                             <div style="width: 30%; height: 1px;"></div>
                             <div style="width: 40%;" class="slds-align_absolute-center" >
                                 <lightning-input type="file" label="Select a file" accept={acceptedFormats} onchange={onSelectFile}></lightning-input>
-                                <!-- SHOW WHEN FIL ATTACHED-->
-                                
-                            
                             </div>
                             
                         </div>
                         <!-- PILLS FOR FILE ATTACHED -->
                         <template if:true={fileVars.attachedFile}><div class="slds-align_absolute-center"><lightning-badge  label={fileVars.fileName} icon-name="standard:file" onclick={removeFile} ></lightning-badge></div></template>
-                        
-                        <div class="progressindicatorbox">
-                            
-                            
-                            <!-- <lightning-button label="Hide CSV" onclick={hideCsv}></lightning-button>
-                            
-                            -->
-                            
-                        
-                        </div>
                     </div>
                 </div>
+
                 <!-- SECOND STEP - PREVIEW -->
-                <div if:true={secondStep} class="slds-align_absolute-center" style="display: grid;">
-                    <div></div><lightning-card  class="slds-card_boundary" variant="Narrow"  title={fileVars.fileName} icon-name="standard:file">
+                <div if:true={visibleSteps.secondStep} class="slds-align_absolute-center" style="display: grid;">
+                    <!-- CARD FOR PREVIEW FILE INFO -->
+                    <lightning-card  class="slds-card_boundary" variant="Narrow"  title={fileVars.fileName} icon-name="standard:file">
                         <p class="slds-p-horizontal_small"><b>File Name: </b>{fileVars.fileName}</p>
                         <p class="slds-p-horizontal_small"><b>File Size: </b>{fileVars.formatFileSize}</p>
                         <p class="slds-p-horizontal_small"><b>File Extension: </b>{fileVars.fileExt}</p>
-
                     </lightning-card>
-
+                    <!-- BUTTON FOR TOGGLING PREVIEW MODAL -->
                     <lightning-button class="slds-align_absolute-center slds-m-vertical_small" label="Preview Your File" onclick={previewImg}></lightning-button>
                 </div>
-                <!-- THIRD STEP - REPLACE -->
-                <div if:true={thirdStep}>
-                    <div class="slds-align_absolute-center">
-                        <lightning-button variant={variantReplaceFile} label={labelReplaceFile} title="Replace an existing file" icon-name={iconReplaceFile} onclick={toggleReplaceFile}></lightning-button>
-                        <lightning-helptext name="textReplace" style="margin-left: 5px; margin-top: 2px;" content={replaceHelpText}></lightning-helptext>
 
+                <!-- THIRD STEP - REPLACE -->
+                <div if:true={visibleSteps.thirdStep}>
+                    <!-- TOGGLE REPLACE OR CREATE NEWFILE -->
+                    <div class="slds-align_absolute-center">
+                        <lightning-button variant={replaceFileButton.variant} label={replaceFileButton.label} title="Replace an existing file" icon-name={replaceFileButton.icon} onclick={toggleReplaceFile}></lightning-button>
+                        <lightning-helptext name="textReplace" style="margin-left: 5px; margin-top: 2px;" content={replaceFileButton.helpText}></lightning-helptext>
                     </div>
-                    <div  if:true={showReplaceFile} class="" style="position: static; padding: 2%;">
+                    <!-- FILE CUSTOM LOOK UP -->
+                    <div  if:true={show.replaceFile} class="" style="position: static; padding: 2%;">
+                        <!-- LOOKUP CUSTOM FIELD FOR SEARCHING EXISTING FILE -->
                         <c-custom_dyn-look-up 
                             placeholder="Search" 
                             objectconfig ={replaceObject}
@@ -65,10 +54,14 @@
                         </c-custom_dyn-look-up>
                     </div>
                 </div>
+
                 <!-- FORTH STEP - ASSIGN RECORD --> 
-                <div if:true={forthStep}>
+                <div if:true={visibleSteps.forthStep}>
+                    <!-- CMP TO TOGGLE ASSIGNMENT TYPE -->
                     <c-custom_assign-file onselect={onSelectAssignment}></c-custom_assign-file>    
-                    <div  if:true={showLookUp} class="slds-box" style="position: static;">
+                    <!-- ENTITY TYPE SELECT AND LOOK UP FIELD -->
+                    <div  if:true={show.lookUp} class="slds-box" style="position: static;">
+                        <!-- COMBOBOX FOR SELECTING A ENTITY TYPE -->
                         <lightning-combobox
                         id="entity"
                         name="entity"
@@ -77,38 +70,37 @@
                         placeholder="Select Entity Type"
                         options={entityOptions}
                         onchange={changeEntity}
-                        disabled={disableEntity} >
+                        disabled={disabled.entityInput} >
                         </lightning-combobox>
+                        <!-- CUSTOM LOOK UP FOR SEARCH RECORDS TO ASSIGN FILE -->
                         <c-custom_dyn-look-up 
                             placeholder="Search" 
                             objectconfig ={ObjectConfig}
-                            onlookup={handleAccountChange}
-                            oninputchange={handlesearchInputChange}
+                            onlookup={handleSelectRecord}
+                            oninputchange={handleRecordSearch}
                             label-name="Select the record to be assigned">
                         </c-custom_dyn-look-up>
                     </div>
                 </div>
+
                 <!-- FINISH STEP -->
-                <div if:true={finishStep} class="slds-notify_container slds-is-relative">
+                <div if:true={visibleSteps.finishStep} class="slds-notify_container slds-is-relative">
                     <div class={result.resultClass}  role="status">
-                      <lightning-icon style="margin-right: 6px;" class="whitebutton" icon-name={result.resultIcon} alternative-text="success" title="Success"  size="small"></lightning-icon>
-
-                      <div class="slds-notify__content">
-                        <h2 class="slds-text-heading_small ">
-                            {result.resultMessage}
-                        </h2>
-                      </div>
-                      <div class="slds-notify__close">
-                        <lightning-icon class="whitebutton" icon-name="utility:close" alternative-text="Close" title="Close" size="small"></lightning-icon>
-
-                      </div>
+                        <lightning-icon style="margin-right: 6px;" class="whitebutton" icon-name={result.resultIcon} alternative-text="success" title="Success"  size="small"></lightning-icon>
+                        <div class="slds-notify__content">
+                            <h2 class="slds-text-heading_small ">
+                                {result.resultMessage}
+                            </h2>
+                        </div>
                     </div>
                 </div>
 
-                <div if:true={spinnerLoading}><lightning-spinner alternative-text="Loading"></lightning-spinner></div>
-                <!-- </div> -->
+                <!-- SPINNER LOADING -->
+                <div if:true={show.spinnerLoading}><lightning-spinner alternative-text="Loading"></lightning-spinner></div>
+                
                 <!-- FOOTER-->
                 <div style=" text-align: center; margin-top: 20px;">  
+                        <!-- PROGRESS PATH STEPS -->
                         <div style="width: 70%; display:inline-block; margin: 1%;">
                             <lightning-progress-indicator current-step={currentStep} type="base" variant="base">
                                 <template for:each={uploadSteps} for:item="step">
@@ -118,25 +110,23 @@
                                 </template>
                             </lightning-progress-indicator>  
                         </div>        
-                        <!-- SAVE BUTTON -->
-                        <div  style="padding: 5px; " if:true={showNextButton}>
-                            <lightning-button style="margin: 5px;" variant="neutral" name="back" label="Back" onclick={changeStep} disabled={backDisabled}></lightning-button>
-
-                            <lightning-button style="margin: 5px;" variant="brand" name="next" label="Next" onclick={changeStep} disabled={nextDisabled}></lightning-button>
-
+                        <!-- NEXT & BACK BUTTON -->
+                        <div style="padding: 5px; " if:true={show.nextButton}>
+                            <lightning-button style="margin: 5px;" variant="neutral" name="back" label="Back" onclick={changeStep} disabled={disabled.backButton}></lightning-button>
+                            <lightning-button style="margin: 5px;" variant="brand" name="next" label="Next" onclick={changeStep} disabled={disabled.nextButton}></lightning-button>
                         </div>
-                        
-                        <div  style="padding: 5px" if:true={showSaveButton}>
-                            <lightning-button variant="brand" name="save" label="Save" title="Save your file" onclick={saveFile} disabled={saveDisabled}></lightning-button>
+                        <!-- SAVE BUTTON -->
+                        <div style="padding: 5px" if:true={show.saveButton}>
+                            <lightning-button variant="brand" name="save" label="Save" title="Save your file" onclick={saveFile} disabled={disabled.saveButton}></lightning-button>
                             <lightning-helptext name="textAssign" style="margin-left: 5px; margin-top: 2px;" content={entityHelpText}></lightning-helptext>
                         </div>
-                        
                 </div>
+                
             </lightning-card>
         </div>
     </div>
     <!-- MODAL PREVIEW -->
-    <div if:true={showPreview}>
+    <div if:true={show.previewModal}>
         <section  role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-labelledby="modal-heading-01" aria-modal="true" >
             <div class="slds-modal__container">
                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={previewImg}>

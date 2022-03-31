@@ -20,14 +20,10 @@
                                 
                             
                             </div>
-                            <div style="width: 30%; margin-right: 0; margin-left: auto;" if:true={attachedFile}>
-
-                                    
-                                
-                            </div>
+                            
                         </div>
                         <!-- PILLS FOR FILE ATTACHED -->
-                        <template if:true={attachedFile}><div class="slds-align_absolute-center"><lightning-badge  label={fileName} icon-name="standard:file" onclick={removeFile} ></lightning-badge></div></template>
+                        <template if:true={fileVars.attachedFile}><div class="slds-align_absolute-center"><lightning-badge  label={fileVars.fileName} icon-name="standard:file" onclick={removeFile} ></lightning-badge></div></template>
                         
                         <div class="progressindicatorbox">
                             
@@ -42,10 +38,10 @@
                 </div>
                 <!-- SECOND STEP - PREVIEW -->
                 <div if:true={secondStep} class="slds-align_absolute-center" style="display: grid;">
-                    <div></div><lightning-card  class="slds-card_boundary" variant="Narrow"  title={fileName} icon-name="standard:file">
-                        <p class="slds-p-horizontal_small"><b>File Name: </b>{fileName}</p>
-                        <p class="slds-p-horizontal_small"><b>File Size: </b>{fileSize}</p>
-                        <p class="slds-p-horizontal_small"><b>File Extension: </b>{fileExt}</p>
+                    <div></div><lightning-card  class="slds-card_boundary" variant="Narrow"  title={fileVars.fileName} icon-name="standard:file">
+                        <p class="slds-p-horizontal_small"><b>File Name: </b>{fileVars.fileName}</p>
+                        <p class="slds-p-horizontal_small"><b>File Size: </b>{fileVars.formatFileSize}</p>
+                        <p class="slds-p-horizontal_small"><b>File Extension: </b>{fileVars.fileExt}</p>
 
                     </lightning-card>
 
@@ -150,13 +146,13 @@
                     <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Modal header</h1>
                 </div>
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="height:100vh;" >
-                    <div style="height: 100%;" if:true={isPdf}>
+                    <div if:true={fileVars.isPdf} style="height: 100%;" >
                         <embed src={previewFile} height="100%" width="100%">
                     </div>
-                    <div if:true={isImg}>
+                    <div if:true={fileVars.isImg}>
                         <div class="imagepreview"><img id="imagepreview" src={previewFile}></img></div>
                     </div>
-                    <div if:true={isCsv}>
+                    <div if:true={fileVars.isCsv}>
                         <lightning-datatable
                             key-field="id"
                             data={dataTableData}

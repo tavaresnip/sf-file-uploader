@@ -6,20 +6,19 @@ import getSettings from '@salesforce/apex/CNT_SearchLookUpRecords.getComponentSe
 export default class Custom_UploadNewFile extends LightningElement {
     supportedImgs = ['png','jpg', 'jpeg'];
     supportedCsvs = ['csv']
-    @track isPdf = false;
+    //@track isPdf = false;
     showPreview = false;
     fileMaxSize = 5000000;
     /** ENTITY */
     showLookUp = false;
     @track entityOptions;
     @track dataTableColumns = [];
-    @track isImg = false;
-    @track isCsv = false;
+    //@track isImg = false;
+    //@track isCsv = false;
     @track dataTableData =  [];
     @track previewFile;
-    @track fileUploaded;
-    @track attachedFile = false;
-    @track fileName;
+    //@track attachedFile = false;
+    //@track fileName;
     @track uploadSteps = [
         {label: 'Select file', value: 0, show: true},
         {label: 'Preview File', value: 1,show: true},
@@ -28,13 +27,25 @@ export default class Custom_UploadNewFile extends LightningElement {
         {label: 'Save File', value: 4, show: true}
     ]
     @api myRecordId;
+    @track fileVars = {
+        fileSize: 0,
+        cvtdFileSize: '0 KB',
+        fileExt: '',
+        fileName: '',
+        base64: '',
+        attachedFile: false,
+        isCsv: false,
+        isImg: false,
+        isPdf: false
+    }
+
     @track currentStep = 0;
     @track entityHelpText;
     @track settings;
-    @track fileSize = 0;
-    @track fileExt;
+    //@track fileSize = 0;
+    //@track fileExt;
     @track disableReplace = false;
-    base64;
+    //base64;
     helpText = {
         assignMe: 'Assign Me : Assign to your user', 
         assignUser: 'Assign to an user : you can select an user to assign',
@@ -72,6 +83,14 @@ export default class Custom_UploadNewFile extends LightningElement {
         resultMessage:      '',
         resultIcon:         ''
     }
+    saveDisabled = false;
+    showNextButton = true;
+    showSaveButton = false;
+    spinnerLoading = false;
+    disableEntity = false;
+    @track entityValue;
+    toggleAssignRecord = false;
+
     /** super constructor 1st */
     constructor(){
         super();
@@ -98,7 +117,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.removeFile(); // clear all setup 
         
         var fileExt = this.verifyExtension(event.target.files);
-        this.fileExt = fileExt;
+        this.fileVars.fileExt = fileExt;
         switch (fileExt){
             case 'img':
                 this.togglePreview('img', file);
@@ -116,25 +135,30 @@ export default class Custom_UploadNewFile extends LightningElement {
                 this.src = null;
                 break;
         }
-
-        this.nextDisabled = !this.nextDisabled;
+        this.nextDisabled = false;
     }
     /** check file size limit  */
     checkFileSize(file){
-        var fileSizeLimit = file.size > this.fileMaxSize;
+        var fileSizeLimit = file.size > this.fileVars.fileMaxSize;
         if(fileSizeLimit) {
-            alert('Maximum file size exceeded ' + this.fileMaxSize/1000000 + ' MB');
+            alert('Maximum file size exceeded ' + this.fileVars.fileMaxSize/1000000 + ' MB');
             return fileSizeLimit;
         }
-        
-        this.fileSize = file.size/1000000;
-        console.log('max size exceeded');
+        console.log('file.size ' + file.size);
+        this.fileVars.formatFileSize = this.formatFileSize(Math.round(file.size/1000));
+        this.fileVars.fileSize = file.size;
+        console.log('max size exceeded');                                                                                                                                                 
 
         return fileSizeLimit;
     }
-
-    
-
+    /** get visual value for file size 4MB 1KB etc */
+    formatFileSize(size){
+        if(size > 1024){
+            return (size/1024) + ' MB';
+        }else{
+            return size + ' KB';
+        }
+    }
     // get allowed file formats
     get acceptedFormats(){
             if(this.settings.data){
@@ -147,16 +171,16 @@ export default class Custom_UploadNewFile extends LightningElement {
     togglePreview(type, file){
         switch(type){
             case 'img':
-                this.isImg = true;
+                this.fileVars.isImg = true;
                 this.previewFile = URL.createObjectURL(file);
                 break;
             case 'pdf':
                 this.previewFile = URL.createObjectURL(file);
-                this.isPdf = true;
+                this.fileVars.isPdf = true;
                 break;
             case 'csv':
                 this.previewFile = true;
-                this.isCsv = true;
+                this.fileVars.isCsv = true;
                 break;
         }
     }
@@ -166,9 +190,9 @@ export default class Custom_UploadNewFile extends LightningElement {
         var reader = new FileReader()
         reader.onload = () => {
             console.log(reader.result.split(',')[0]);
-            this.base64 = reader.result.split(',')[1]
+            this.fileVars.base64 = reader.result.split(',')[1]
             
-            console.log(this.base64)
+            console.log(this.fileVars.base64)
         }
         reader.readAsDataURL(file)
     }
@@ -198,10 +222,9 @@ export default class Custom_UploadNewFile extends LightningElement {
     /**  */
     verifyExtension(files){
         console.log('start StoreFile');
-        this.fileName = files[0].name.toLowerCase();
-        this.fileUploaded = files;
-        this.attachedFile = true;
-        var splitName = this.fileName.split('.');
+        this.fileVars.fileName = files[0].name.toLowerCase();
+        this.fileVars.attachedFile = true;
+        var splitName = this.fileVars.fileName.split('.');
         var fileExt = splitName[splitName.length - 1];
         console.log('extName : ' + splitName[splitName.length - 1]);
 
@@ -233,20 +256,7 @@ export default class Custom_UploadNewFile extends LightningElement {
             if(event.target.name == 'next') this.currentStep++;
             else this.currentStep--;
             console.log('this.nextDisabled ' + this.nextDisabled);
-            this.nextDisabled = true;
-            switch (this.currentStep){
-                case 1:
-                    this.nextDisabled = false;
-                    break;
-                case 2:
-                    this.nextDisabled = false;
-                    break;
-                case 3:
-                    break;
-                case 4:   
-                    break;
-            }
-
+            
             this.toggleStepVisibility(this.currentStep);
             
         }else{
@@ -261,18 +271,19 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.secondStep = false;
         this.thirdStep = false;
         this.forthStep = false;
-        this.backDisabled = true;
+        this.backDisabled = false;
         this.nextDisabled = true;
         this.showSaveButton = false;
         switch (number){
             case 0:
             this.firstStep = true;
-            this.nextDisabled = !this.attachedFile;
+            this.nextDisabled = !this.fileVars.attachedFile;
             this.backDisabled = true;
                 break;
             case 1:
             this.secondStep = true;
             this.nextDisabled = false;
+            
                 break;
             case 2:
             this.thirdStep = true;
@@ -289,19 +300,19 @@ export default class Custom_UploadNewFile extends LightningElement {
 
         }
     }
+
     hideCsv(){
         console.log(this.currentStep);
         this.uploadSteps[2].show = !this.uploadSteps[2].show;
     }
 
     removeFile(){
-        this.fileUploaded = null;
-        this.fileName = null;
-        this.attachedFile = false;
-        this.previewFile = null;
-        this.isCsv = false;
-        this.isImg = false;
-        this.isPdf = false;
+        this.fileVars.fileName = null;
+        this.fileVars.attachedFile = false;
+        this.fileVars.previewFile = null;
+        this.fileVars.isCsv = false;
+        this.fileVars.isImg = false;
+        this.fileVars.isPdf = false;
     }
 
     previewImg(){
@@ -400,6 +411,7 @@ export default class Custom_UploadNewFile extends LightningElement {
             'selected' : true
         }
     ];
+
     handleAccountChange(event){
         console.log('***In handleAccountChange**');
         console.log(event.detail.data.recordId);
@@ -417,6 +429,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         console.log(JSON.stringify(this.settings));
 
     }
+
     getEntityOptions(){
         var returnObj = [];
         returnObj.push({ label: 'All list', value: 'all'});
@@ -427,6 +440,7 @@ export default class Custom_UploadNewFile extends LightningElement {
 
         this.entityOptions = returnObj;
     }
+
     changeEntity(event){
         console.log(event.target.id);
         console.log(this.entityOptions);  
@@ -453,17 +467,16 @@ export default class Custom_UploadNewFile extends LightningElement {
 
         console.log(JSON.stringify(this.ObjectConfig));
     }
+
     assignSelected = 'me';
+
     onSelectAssignment(event){
         console.log('ONSELECTASSIGNMENT : ' + JSON.stringify(event.detail.selected));
         this.assignSelected = event.detail.selected;
         this.toggleAssignment(event.detail.selected);
         
     }
-    spinnerLoading = false;
-    disableEntity = false;
-    @track entityValue;
-    toggleAssignRecord = false;
+    
     toggleAssignment(assign){        
         switch (assign){
             case 'user':
@@ -497,20 +510,18 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.nextDisabled = !((this.assignSelected == 'me') || ((this.assignSelected == 'record' || this.assignSelected == 'user') && this.recordId));
 
     }
-    saveDisabled = false;
-    showNextButton = true;
-    showSaveButton = false;
+    
     saveFile(){
         this.spinnerLoading = !this.spinnerLoading;
         if(userId != '0053h000003TLK1AAO') {
             console.log('saveFile blocked');
             return;
         }
-        console.log('this.fileName ' + this.fileName);
+        console.log('this.fileVars.fileName ' + this.fileVars.fileName);
         console.log('this.recordId ' + this.recordId);
         const parms = {
-            base64: this.base64,
-            fileName: this.fileName,
+            base64: this.fileVars.base64,
+            fileName: this.fileVars.fileName,
             recordId: this.recordId,
             fileId: this.fileId
         };
@@ -533,7 +544,6 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.saveDisabled = true;
         //this.spinnerLoading = !this.spinnerLoading;
     }
-
     
     toggleReplaceFile(event){
         console.log(event.target.value);

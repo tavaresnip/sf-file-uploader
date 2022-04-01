@@ -5,8 +5,9 @@ export default class Custom_modalPreview extends LightningElement {
     supportedCsvs = ['csv'];
     
     @api file;
+    
     @track fileName;
-    @track previewFile;
+    /** toggling visibility for preview type  */
     type = {
         isPdf: false, 
         isCsv: false,
@@ -15,22 +16,27 @@ export default class Custom_modalPreview extends LightningElement {
         isTxt: false
     };
 
+    /** preview for imagem & pdf */
     @track previewFile;
 
+    /** connected callback */
     connectedCallback(){
         console.log(' connectedCallback: modalPreview');
         console.log('file ' + this.file)
         this.setupPreview();
     }
-
+    /** disconnected callback */
     disconnectedCallback(){
         console.log(' disconnectedCallback: modalPreview');
     }
+    /** csv variable for table */
     @track csv = {
         dataTableColumns: [],
         dataTableData: []
     };
-    @api setupPreview(){
+
+    /** setup preview */
+    setupPreview(){
         console.log('firing previewsetup');
         var fileExt = this.verifyExtension(this.file);
         // this.fileVars.fileExt = fileExt;
@@ -55,6 +61,7 @@ export default class Custom_modalPreview extends LightningElement {
 
         return 'success';
     }
+    /** close modal */
     closeModal(){
         const selectedEvent = new CustomEvent('close', {
             bubbles    : true,
@@ -67,7 +74,8 @@ export default class Custom_modalPreview extends LightningElement {
 
         this.dispatchEvent(selectedEvent);
     }
-    /**  */
+
+    /**  check which is the file type*/
     verifyExtension(file){
         var splitName = file.name.split('.');
         console.log(splitName);
@@ -87,6 +95,8 @@ export default class Custom_modalPreview extends LightningElement {
 
         return 'unknown';
     }
+
+    /** create DB from String */
     convertCSVToDT(csvList){
 
         for(const line in csvList){
@@ -119,8 +129,7 @@ export default class Custom_modalPreview extends LightningElement {
         return 'testReturn';
     }
 
-    
-
+    /** create csv to text and call DB creator */
     renderCsvFileToText(file){
         console.log('rendering csv');
         let newPromise = new Promise((resolve, reject) => {
@@ -140,6 +149,7 @@ export default class Custom_modalPreview extends LightningElement {
         });
     }
 
+    /** toggle between preview types, img, pdf, csv, text etc. */
     togglePreview(type, file){
         switch(type){
             case 'img':

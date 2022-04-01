@@ -26,16 +26,14 @@ export default class Custom_UploadNewFile extends LightningElement {
     @api myRecordId;
 
     @track fileVars = {
+        file: null,
         fileSize: 0,
         fileMaxSize: 5000000,
         cvtdFileSize: '0 KB',
         fileExt: '',
         fileName: '',
         base64: '',
-        attachedFile: false,
-        isCsv: false,
-        isImg: false,
-        isPdf: false
+        attachedFile: false
     }
 
     @track currentStep = 0;
@@ -117,25 +115,9 @@ export default class Custom_UploadNewFile extends LightningElement {
             return;
         }
         this.removeFile(); // clear all setup 
-        
-        var fileExt = this.verifyExtension(event.target.files);
+        this.fileVars.file = file;
+        var fileExt = this.verifyFile(event.target.files);
         this.fileVars.fileExt = fileExt;
-        switch (fileExt){
-            case 'img':
-                this.togglePreview('img', file);
-                break;
-            case 'csv':
-                this.togglePreview('csv', file);
-                this.renderCsvFileToText(event);
-                break;
-            case 'pdf':
-                this.togglePreview('pdf', file);
-                break;
-            default:
-                this.previewFile = null;
-                this.src = null;
-                break;
-        }
         this.disabled.nextButton = false;
     }
     /** check file size limit  */
@@ -167,53 +149,18 @@ export default class Custom_UploadNewFile extends LightningElement {
         return [];
     }
 
-    togglePreview(type, file){
-        switch(type){
-            case 'img':
-                this.fileVars.isImg = true;
-                this.previewFile = URL.createObjectURL(file);
-                break;
-            case 'pdf':
-                this.previewFile = URL.createObjectURL(file);
-                this.fileVars.isPdf = true;
-                break;
-            case 'csv':
-                this.previewFile = true;
-                this.fileVars.isCsv = true;
-                break;
-        }
-    }
-
     /** convert file to apex */
     store64File(file){
         var reader = new FileReader()
         reader.onload = () => {
-            this.fileVars.base64 = reader.result.split(',')[1]
-            
+            this.fileVars.base64 = reader.result.split(',')[1]   
         }
+
         reader.readAsDataURL(file)
     }
         
-    renderCsvFileToText(event){
-        let newPromise = new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            reader.onload = function () {
-                resolve(reader.result);
-            };
-            reader.readAsText(event.target.files[0]);
-        })
-        .then(result => {
-            var csvList = [];
-            csvList = result.toString().split('\n');
-            
-            var tst = this.convertCSVToDT(csvList);         
-        })
-        .catch(error => {
-        });
-    }
-
     /**  */
-    verifyExtension(files){
+    verifyFile(files){
         this.fileVars.fileName = files[0].name.toLowerCase();
         this.fileVars.attachedFile = true;
         var splitName = this.fileVars.fileName.split('.');
@@ -231,7 +178,7 @@ export default class Custom_UploadNewFile extends LightningElement {
             return 'pdf';
         }
 
-        return 'unknown';
+        return null;
 
     }
 
@@ -296,54 +243,8 @@ export default class Custom_UploadNewFile extends LightningElement {
     removeFile(){
         this.fileVars.fileName = null;
         this.fileVars.attachedFile = false;
-        this.fileVars.previewFile = null;
-        this.fileVars.isCsv = false;
-        this.fileVars.isImg = false;
-        this.fileVars.isPdf = false;
     }
 
-    previewImg(){
-        if(!this.previewFile){
-            
-            alert('You need to select a file or file format not supported');
-            return;
-        }
-        console.log(this.previewFile);
-        this.show.previewModal = !this.show.previewModal;
-    }
-
-    convertCSVToDT(csvList){
-
-        for(const line in csvList){
-            var csvColumns;
-            if(line == 0){
-                this.dataTableColumns = [];
-
-                csvColumns = csvList[line].split(',');
-                for(const column in csvColumns){
-                    
-                    var fieldName = csvColumns[column];
-                    this.dataTableColumns.push({label: fieldName, fieldName: fieldName});
-
-                }
-            }else{
-                var csvLineTable = csvList[line].split(',');
-                for(const lineField in csvLineTable){
-
-                    if((lineField + 1 ) > csvColumns.length){
-                        this.dataTableData[line - 1] = { ...this.dataTableData[line - 1],
-                            [csvColumns[lineField]] : csvLineTable[lineField]
-                        };
-
-                    }
-                }
-
-            }
-        }
-
-        return 'testReturn';
-    }
-    
     /** LOOK UP SETUP */
     // better option with custom metadata type
     ObjectConfig = [ //Array of objects
@@ -443,8 +344,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     onSelectAssignment(event){
         console.log('ONSELECTASSIGNMENT : ' + JSON.stringify(event.detail.selected));
         this.assignSelected = event.detail.selected;
-        this.toggleAssignment(event.detail.selected);
-        
+        this.toggleAssignment(event.detail.selected);     
     }
     
     /** toggle Assign File to Entity type (User, CurrentUser or Record) */
@@ -483,10 +383,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     /** save file */
     saveFile(){
         this.show.spinnerLoading = !this.show.spinnerLoading;
-        if(userId != '0053h000003TLK1AAO') {
-            console.log('saveFile blocked');
-            return;
-        }
+        
  
         const parms = {
             base64: this.fileVars.base64,
@@ -494,18 +391,24 @@ export default class Custom_UploadNewFile extends LightningElement {
             recordId: this.recordId,
             fileId: this.fileId
         };
-
-        attachFile({ 
-            params: parms
-        }).then(result=>{
-            if(result) {
-                this.showResultMessage('success', '');
-            }else{
-                this.showResultMessage('error', '');
-            }
-        }).catch(error=>{
-            this.showResultMessage('error', error.message);
-        });
+        if(userId != '0053h000003TLK1AAO') {
+            this.showResultMessage('success', error.message);
+            console.log('saveFile blocked');
+            return;
+        }else{
+            attachFile({ 
+                params: parms
+            }).then(result=>{
+                if(result) {
+                    this.showResultMessage('success', '');
+                }else{
+                    this.showResultMessage('error', '');
+                }
+            }).catch(error=>{
+                this.showResultMessage('error', error.message);
+            });
+        }
+        
         this.disabled.backButton = true;
         this.disabled.saveButton = true;
     }
@@ -555,5 +458,14 @@ export default class Custom_UploadNewFile extends LightningElement {
         }
         this.show.spinnerLoading = !this.show.spinnerLoading;
         this.visibleSteps.finishStep = true;
+    }
+
+    previewImg(){
+        console.log('previewImg : ' + this.show.previewModal);
+        // if(!this.show.previewModal){
+            this.show.previewModal = !this.show.previewModal;
+    }
+    closePreview(){
+        this.show.previewModal = false;
     }
 }

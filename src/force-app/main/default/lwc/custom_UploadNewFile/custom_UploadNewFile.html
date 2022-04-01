@@ -127,7 +127,8 @@
     </div>
     <!-- MODAL PREVIEW -->
     <div if:true={show.previewModal}>
-        <section  role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-labelledby="modal-heading-01" aria-modal="true" >
+        <c-custom-_modal-preview onclose={closePreview} file={fileVars.file}></c-custom-_modal-preview>
+        <!-- <section  role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-labelledby="modal-heading-01" aria-modal="true" >
             <div class="slds-modal__container">
                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={previewImg}>
                     <lightning-icon class="whitebutton" icon-name="utility:close" alternative-text="Close" title="Close"></lightning-icon>
@@ -152,7 +153,7 @@
                 </div>
             </div>
         </section>
-        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div> -->
     </div>
     <!-- MODAL PREVIEW -->
 </template>

@@ -1,4 +1,14 @@
 public without sharing class CNT_SearchLookUpRecords {
+    public static final String ORG_WIDE_DEV_NAME = 'orgWidePermission';
+    
+    public static final String PERMISION_SET_DEV_NAME = 'permissionSet';
+    
+    public static final String PROFILE_DEV_NAME = 'profilePermission';
+    
+    public static final String USER_DEV_NAME = 'userPermission';
+
+    public static final Integer permissionSetMax = 10;
+
     @AuraEnabled(cacheable=True)
     public static string searchObjects(String objectsConfig, Object searchTerm){
             System.debug([SELECT Id FROM Contact LIMIT 5]);
@@ -162,9 +172,57 @@ public without sharing class CNT_SearchLookUpRecords {
     }
 
     @AuraEnabled(cacheable = true)
-    public static uploaderCmpSettings__c getComponentSettings(){
+    public static cmp_advImporterSettings__c getComponentSettings(){
         uploaderCmpSettings__c settings = uploaderCmpSettings__c.getInstance();
+        String query = ' SELECT ' + getQueryFields() + ' FROM cmp_advImporterSettings__c WHERE ' + getQueryConditions() + ' ORDER BY prioritySettings__c ASC';
+        System.debug(query);
+        List<cmp_advImporterSettings__c> settingsList = Database.query(query);
+        if(!settingsList.isEmpty()){
+            return settingsList[0];
+        }
 
-        return settings;
+        return new cmp_advImporterSettings__c();
+
+        
+    }
+    
+    public static List<Schema.FieldSetMember> getFields() {
+        return SObjectType.cmp_advImporterSettings__c.FieldSets.fieldsForRetrieve.getFields();
+    }
+
+    public static String getQueryFields(){
+        System.debug(getFields());
+        String query = ' Id, RecordType.DeveloperName ';
+        for(Schema.FieldSetMember f : getFields()) {
+            query += ', ' + f.getFieldPath();
+        }
+        return query;
+    }
+
+    public static String getQueryConditions(){
+        Id userId = UserInfo.getUserId();
+        String profileId = UserInfo.getProfileId();
+        String idCondition = ' User__c = \'' + userId + '\' ';
+        String profileCondition = ' User__r.Profile.Id = \'' + profileId + '\' ';
+        String orgWide = ' RecordType.Name = \'permissionSet\' ';
+        List<PermissionSetAssignment> permSet = [SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId =: userId AND PermissionSet.Name IN: getPermissionSetList() ORDER BY PermissionSet.Name ASC];
+        System.debug(permSet);
+        String permSetCondition = '';
+        if(permSet.size() > 0){
+            List<String> permSetNames = new List<String>();
+            for(PermissionSetAssignment pset : permSet){
+                    permSetNames.add(pset.PermissionSet.Name);
+            }
+            permSetCondition = 'permissionSetName__c IN (\'' + String.join(permSetNames, '\',\'') + '\') ';
+            System.debug(permSetCondition);
+        }
+        return ' ' + idCondition + ' OR ' + profileCondition + ' OR ' + orgWide + ' OR ' + permSetCondition;
+    }
+    public static Set<String> getPermissionSetList(){
+        Set<String> setString = new Set<String>();
+        for(Integer i = 1; i <= permissionSetMax ; i++){
+           setString.add('advImpWiz' + i);     
+        }
+        return setString;
     }
 }

@@ -24,6 +24,18 @@ export default class Custom_UploadNewFile extends LightningElement {
     ]
 
     @api myRecordId;
+    @track settings = {
+        name: '',
+        fileFormats: '',
+        replaceAllDocs: '',
+        disableReplace: true,
+        hideBackButton: true,
+        disableBackButton: false,
+        disablePreview: true,
+        disableAssignUser: true,
+        disableAssignRecord: true
+
+    };
 
     @track fileVars = {
         file: null,
@@ -40,7 +52,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     
     @track entityHelpText;
 
-    @track settings;
+    // @track settings;
 
     visibleSteps = {
         finishStep: false,
@@ -140,14 +152,20 @@ export default class Custom_UploadNewFile extends LightningElement {
             return size + ' KB';
         }
     }
-    // get allowed file formats
-    get acceptedFormats(){
-            if(this.settings.data){
-                console.log(JSON.stringify(this.settings.data));
-                return this.settings.data.acceptedFormats__c.split(',');
-            }
-        return [];
-    }
+
+    // get settingsName(){
+    //     if(this.settings.data){
+    //         return this.settings.data.Name;
+    //     }
+    // }
+    // // get allowed file formats
+    // get acceptedFormats(){
+    //         if(this.settings.data){
+    //             console.log(JSON.stringify(this.settings.data));
+    //             return this.settings.fileFormats.split(';');
+    //         }
+    //     return [];
+    // }
 
     /** convert file to apex */
     store64File(file){
@@ -205,7 +223,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.visibleSteps.secondStep = false;
         this.visibleSteps.thirdStep = false;
         this.visibleSteps.forthStep = false;
-        this.disabled.backButton = false;
+        this.disabled.backButton = this.settings.disableBackButton;
         this.disabled.nextButton = true;
         this.show.saveButton = false;
         switch (number){
@@ -217,7 +235,6 @@ export default class Custom_UploadNewFile extends LightningElement {
             case 1:
             this.visibleSteps.secondStep = true;
             this.disabled.nextButton = false;
-            
                 break;
             case 2:
             this.visibleSteps.thirdStep = true;
@@ -303,7 +320,33 @@ export default class Custom_UploadNewFile extends LightningElement {
     }
     
     /** wire settings apex */
-    @wire( getSettings ) settings;
+    @wire( getSettings ) getSettings({error, data}){
+        if(data){
+            console.log(JSON.stringify(data));
+            this.settings.name = data.Name;
+            this.settings.fileFormats = data.fileFormats__c;
+            this.settings.replaceAllDocs = !data.replaceAllDocs__c;
+            this.settings.disableReplace = !data.enableReplace__c;
+            
+            if(data.backButtonSettings__c == 'Hidden'){
+                this.settings.hideBackButton = true;
+                this.settings.disableBackButton = true;
+            }else if(data.backButtonSettings__c == 'Disabled'){
+                this.settings.disableBackButton = true;
+                this.settings.hideBackButton = false;
+
+            }else{
+                this.settings.hideBackButton = false;
+            }
+
+            this.settings.disablePreview = !data.enablePreview__c;
+            this.settings.disableAssignUser = !data.enableAssignUser__c;
+            this.settings.disableAssignRecord = !data.enableAssignRecord__c;
+            console.log(this.settings.disableBackButton);
+        }else if(error){
+            console.log(error);
+        }
+    };;
 
     /** create options for entity picklist */
     getEntityOptions(){

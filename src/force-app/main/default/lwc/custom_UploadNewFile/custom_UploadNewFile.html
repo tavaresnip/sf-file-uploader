@@ -3,7 +3,8 @@
         <div class="externalbox">
             <!-- M A I N   - C A R D -->
             <lightning-card title="Advanced File Import Wizard">
-                
+                <lightning-helptext name="textAssign" style="margin-left: 5%; " content={settings.name}></lightning-helptext>
+
                 <!-- FIRST STEP - SELECT FILE -->
                 <div if:true={visibleSteps.firstStep} data-name="firststep">
                     <div class="tst">
@@ -13,7 +14,7 @@
                             <!-- UPLOAD INPUT FIELD -->
                             <div style="width: 30%; height: 1px;"></div>
                             <div style="width: 40%;" class="slds-align_absolute-center" >
-                                <lightning-input type="file" label="Select a file" accept={acceptedFormats} onchange={onSelectFile}></lightning-input>
+                                <lightning-input type="file" label="Select a file" accept={settings.fileFormats} onchange={onSelectFile}></lightning-input>
                             </div>
                             
                         </div>
@@ -25,20 +26,20 @@
                 <!-- SECOND STEP - PREVIEW -->
                 <div if:true={visibleSteps.secondStep} class="slds-align_absolute-center" style="display: grid;">
                     <!-- CARD FOR PREVIEW FILE INFO -->
-                    <lightning-card  class="slds-card_boundary" variant="Narrow"  title={fileVars.fileName} icon-name="standard:file">
+                    <lightning-card  class="slds-card_boundary" variant="4Narrow"  title={fileVars.fileName} icon-name="standard:file">
                         <p class="slds-p-horizontal_small"><b>File Name: </b>{fileVars.fileName}</p>
                         <p class="slds-p-horizontal_small"><b>File Size: </b>{fileVars.formatFileSize}</p>
                         <p class="slds-p-horizontal_small"><b>File Extension: </b>{fileVars.fileExt}</p>
                     </lightning-card>
                     <!-- BUTTON FOR TOGGLING PREVIEW MODAL -->
-                    <lightning-button class="slds-align_absolute-center slds-m-vertical_small" label="Preview Your File" onclick={previewImg}></lightning-button>
+                    <lightning-button disabled={settings.disablePreview} class="slds-align_absolute-center slds-m-vertical_small" label="Preview Your File" onclick={previewImg}></lightning-button>
                 </div>
 
                 <!-- THIRD STEP - REPLACE -->
                 <div if:true={visibleSteps.thirdStep}>
                     <!-- TOGGLE REPLACE OR CREATE NEWFILE -->
                     <div class="slds-align_absolute-center">
-                        <lightning-button variant={replaceFileButton.variant} label={replaceFileButton.label} title="Replace an existing file" icon-name={replaceFileButton.icon} onclick={toggleReplaceFile}></lightning-button>
+                        <lightning-button disabled={settings.disableReplace} variant={replaceFileButton.variant} label={replaceFileButton.label} title="Replace an existing file" icon-name={replaceFileButton.icon} onclick={toggleReplaceFile}></lightning-button>
                         <lightning-helptext name="textReplace" style="margin-left: 5px; margin-top: 2px;" content={replaceFileButton.helpText}></lightning-helptext>
                     </div>
                     <!-- FILE CUSTOM LOOK UP -->
@@ -50,7 +51,8 @@
                             onlookup={handleReplaceChange}
                             oninputchange={handleSearchReplace}
                             label-name="Search your file to be replaced"
-                            disabled={disableReplace}>
+                            disabled={disableReplace}
+                            >
                         </c-custom_dyn-look-up>
                     </div>
                 </div>
@@ -58,7 +60,7 @@
                 <!-- FORTH STEP - ASSIGN RECORD --> 
                 <div if:true={visibleSteps.forthStep}>
                     <!-- CMP TO TOGGLE ASSIGNMENT TYPE -->
-                    <c-custom_assign-file onselect={onSelectAssignment}></c-custom_assign-file>    
+                    <c-custom_assign-file onselect={onSelectAssignment} settings={settings}></c-custom_assign-file>    
                     <!-- ENTITY TYPE SELECT AND LOOK UP FIELD -->
                     <div  if:true={show.lookUp} class="slds-box" style="position: static;">
                         <!-- COMBOBOX FOR SELECTING A ENTITY TYPE -->
@@ -112,7 +114,7 @@
                         </div>        
                         <!-- NEXT & BACK BUTTON -->
                         <div style="padding: 5px; " if:true={show.nextButton}>
-                            <lightning-button style="margin: 5px;" variant="neutral" name="back" label="Back" onclick={changeStep} disabled={disabled.backButton}></lightning-button>
+                            <lightning-button if:false={settings.hideBackButton} style="margin: 5px;" variant="neutral" name="back" label="Back" onclick={changeStep} disabled={disabled.backButton}></lightning-button>
                             <lightning-button style="margin: 5px;" variant="brand" name="next" label="Next" onclick={changeStep} disabled={disabled.nextButton}></lightning-button>
                         </div>
                         <!-- SAVE BUTTON -->

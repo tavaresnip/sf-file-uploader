@@ -16,7 +16,7 @@ export default class Custom_modalPreview extends LightningElement {
         isTxt: false
     };
 
-    /** preview for imagem & pdf */
+    /** preview for image & pdf */
     @track previewFile;
 
     /** connected callback */

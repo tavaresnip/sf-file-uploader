@@ -9,7 +9,7 @@
             </div>
             <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="height:100vh;" >
                 <div if:true={type.isPdf} style="height: 100%;" >
-                    <embed src={previewFile} height="100%" width="100%">
+                    <iframe src={previewFile} height="100%" width="100%"></iframe>
                 </div>
                 <div if:true={type.isImg}>
                     <div class="imagepreview"><img id="imagepreview" src={previewFile}></img></div>

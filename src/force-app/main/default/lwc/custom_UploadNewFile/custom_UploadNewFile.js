@@ -33,7 +33,8 @@ export default class Custom_UploadNewFile extends LightningElement {
         disableBackButton: false,
         disablePreview: true,
         disableAssignUser: true,
-        disableAssignRecord: true
+        disableAssignRecord: true,
+        enablePreviewTypes: ''
 
     };
 
@@ -45,7 +46,8 @@ export default class Custom_UploadNewFile extends LightningElement {
         fileExt: '',
         fileName: '',
         base64: '',
-        attachedFile: false
+        attachedFile: false,
+        fileType: ''
     }
 
     @track currentStep = 0;
@@ -131,7 +133,13 @@ export default class Custom_UploadNewFile extends LightningElement {
         var fileExt = this.verifyFile(event.target.files);
         this.fileVars.fileExt = fileExt;
         this.disabled.nextButton = false;
+        this.settings.disablePreview = this.validatePreview();
     }
+
+    validatePreview(){
+        return this.settings.enablePreviewTypes.includes(this.fileVars.fileType);
+    }
+
     /** check file size limit  */
     checkFileSize(file){
         var fileSizeLimit = file.size > this.fileVars.fileMaxSize;
@@ -189,10 +197,13 @@ export default class Custom_UploadNewFile extends LightningElement {
         var isPdf = fileExt == 'pdf';
 
         if(isImg){
+            this.fileVars.fileType = 'IMAGE';
             return 'img';
         }else if(isCsv){
+            this.fileVars.fileType = 'CSV';
             return 'csv';
         }else if(isPdf){
+            this.fileVars.fileType = 'PDF';
             return 'pdf';
         }
 
@@ -342,6 +353,7 @@ export default class Custom_UploadNewFile extends LightningElement {
             this.settings.disablePreview = !data.enablePreview__c;
             this.settings.disableAssignUser = !data.enableAssignUser__c;
             this.settings.disableAssignRecord = !data.enableAssignRecord__c;
+            this.settings.enablePreviewTypes = data.enablePreviewTypes__c;
             console.log(this.settings.disableBackButton);
         }else if(error){
             console.log(error);
@@ -505,8 +517,9 @@ export default class Custom_UploadNewFile extends LightningElement {
 
     previewImg(){
         console.log('previewImg : ' + this.show.previewModal);
-        // if(!this.show.previewModal){
+        if(!this.this.validatePreview()){
             this.show.previewModal = !this.show.previewModal;
+        }
     }
     closePreview(){
         this.show.previewModal = false;

@@ -2,6 +2,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import attachFile from '@salesforce/apex/CNT_SearchLookUpRecords.attachFile';
 import userId from '@salesforce/user/Id';
 import getSettings from '@salesforce/apex/CNT_SearchLookUpRecords.getComponentSettings';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class Custom_UploadNewFile extends LightningElement {
     supportedImgs = ['png','jpg', 'jpeg'];
@@ -35,7 +36,6 @@ export default class Custom_UploadNewFile extends LightningElement {
         disableAssignUser: true,
         disableAssignRecord: true,
         enablePreviewTypes: ''
-
     };
 
     @track fileVars = {
@@ -53,8 +53,6 @@ export default class Custom_UploadNewFile extends LightningElement {
     @track currentStep = 0;
     
     @track entityHelpText;
-
-    // @track settings;
 
     visibleSteps = {
         finishStep: false,
@@ -142,9 +140,10 @@ export default class Custom_UploadNewFile extends LightningElement {
 
     /** check file size limit  */
     checkFileSize(file){
-        var fileSizeLimit = file.size > this.fileVars.fileMaxSize;
+        var fileSizeLimit = file.size/1000 > this.fileVars.fileMaxSize;
         if(fileSizeLimit) {
-            alert('Maximum file size exceeded ' + this.fileVars.fileMaxSize/1000000 + ' MB');
+            this.showNotification('error', 'File Max Size Limit', 'Maximum file size exceeded ' + this.fileVars.fileMaxSize/1024 + ' MB');
+            // alert('Maximum file size exceeded ' + this.fileVars.fileMaxSize/1024 + ' MB');
             return fileSizeLimit;
         }
         this.fileVars.formatFileSize = this.formatFileSize(Math.round(file.size/1000));
@@ -160,20 +159,6 @@ export default class Custom_UploadNewFile extends LightningElement {
             return size + ' KB';
         }
     }
-
-    // get settingsName(){
-    //     if(this.settings.data){
-    //         return this.settings.data.Name;
-    //     }
-    // }
-    // // get allowed file formats
-    // get acceptedFormats(){
-    //         if(this.settings.data){
-    //             console.log(JSON.stringify(this.settings.data));
-    //             return this.settings.fileFormats.split(';');
-    //         }
-    //     return [];
-    // }
 
     /** convert file to apex */
     store64File(file){
@@ -354,6 +339,7 @@ export default class Custom_UploadNewFile extends LightningElement {
             this.settings.disableAssignUser = !data.enableAssignUser__c;
             this.settings.disableAssignRecord = !data.enableAssignRecord__c;
             this.settings.enablePreviewTypes = data.enablePreviewTypes__c;
+            this.fileVars.fileMaxSize = data.fileSizeLimit__c;
             console.log(this.settings.disableBackButton);
         }else if(error){
             console.log(error);
@@ -523,5 +509,14 @@ export default class Custom_UploadNewFile extends LightningElement {
     }
     closePreview(){
         this.show.previewModal = false;
+    }
+
+    showNotification(variant, title, msg) {
+        const evt = new ShowToastEvent({
+            title: title,
+            message: msg,
+            variant: variant,
+        });
+        this.dispatchEvent(evt);
     }
 }

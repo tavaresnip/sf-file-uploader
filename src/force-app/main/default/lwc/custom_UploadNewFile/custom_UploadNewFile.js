@@ -137,7 +137,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     }
 
     validatePreview(){
-        return this.settings.enablePreviewTypes.includes(this.fileVars.fileType);
+        return !this.settings.enablePreviewTypes.includes(this.fileVars.fileType);
     }
 
     /** check file size limit  */
@@ -335,7 +335,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         if(data){
             console.log(JSON.stringify(data));
             this.settings.name = data.Name;
-            this.settings.fileFormats = data.fileFormats__c;
+            this.settings.fileFormats = data.fileFormats__c.split(';');
             this.settings.replaceAllDocs = !data.replaceAllDocs__c;
             this.settings.disableReplace = !data.enableReplace__c;
             
@@ -358,7 +358,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         }else if(error){
             console.log(error);
         }
-    };;
+    };
 
     /** create options for entity picklist */
     getEntityOptions(){
@@ -517,7 +517,7 @@ export default class Custom_UploadNewFile extends LightningElement {
 
     previewImg(){
         console.log('previewImg : ' + this.show.previewModal);
-        if(!this.this.validatePreview()){
+        if(!this.validatePreview()){
             this.show.previewModal = !this.show.previewModal;
         }
     }

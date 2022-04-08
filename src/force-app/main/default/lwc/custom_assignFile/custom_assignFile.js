@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 
 export default class Custom_assignFile extends LightningElement {
     
@@ -6,7 +6,7 @@ export default class Custom_assignFile extends LightningElement {
     @track meVariant = 'brand';
     @track userVariant = 'neutral';
     @track recordVariant = 'neutral';
-
+    @api settings;
     handleClick(event){
         console.log(event.target.name);
         this.toggleBrand(event.target.name);

@@ -1,0 +1,28 @@
+<template >
+    <section  role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-labelledby="modal-heading-01" aria-modal="true" >
+        <div class="slds-modal__container">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={closeModal}>
+                <lightning-icon class="whitebutton" icon-name="utility:close" alternative-text="Close" title="Close"></lightning-icon>
+            </button>
+            <div class="slds-modal__header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{file.name}</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="height:100vh;" >
+                <div if:true={type.isPdf} style="height: 100%;" >
+                    <iframe src={previewFile} height="100%" width="100%"></iframe>
+                </div>
+                <div if:true={type.isImg}>
+                    <div class="imagepreview"><img id="imagepreview" src={previewFile}></img></div>
+                </div>
+                <div if:true={type.isCsv}>
+                    <lightning-datatable
+                        key-field="id"
+                        data={csv.dataTableData}
+                        columns={csv.dataTableColumns}>
+                    </lightning-datatable>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+</template>

@@ -47,7 +47,7 @@
                         <!-- LOOKUP CUSTOM FIELD FOR SEARCHING EXISTING FILE -->
                         <c-custom_dyn-look-up 
                             placeholder="Search" 
-                            objectconfig ={replaceObject}
+                            objectconfig ={settings.replaceConfig}
                             onlookup={handleReplaceChange}
                             oninputchange={handleSearchReplace}
                             label-name="Search your file to be replaced"
@@ -77,7 +77,7 @@
                         <!-- CUSTOM LOOK UP FOR SEARCH RECORDS TO ASSIGN FILE -->
                         <c-custom_dyn-look-up 
                             placeholder="Search" 
-                            objectconfig ={ObjectConfig}
+                            objectconfig ={settings.objectConfig}
                             onlookup={handleSelectRecord}
                             oninputchange={handleRecordSearch}
                             label-name="Select the record to be assigned">

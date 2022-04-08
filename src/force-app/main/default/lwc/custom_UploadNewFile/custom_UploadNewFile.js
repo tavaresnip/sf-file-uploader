@@ -35,7 +35,9 @@ export default class Custom_UploadNewFile extends LightningElement {
         disablePreview: true,
         disableAssignUser: true,
         disableAssignRecord: true,
-        enablePreviewTypes: ''
+        enablePreviewTypes: '',
+        objectConfig: '',
+        replaceConfig: ''
     };
 
     @track fileVars = {
@@ -69,20 +71,6 @@ export default class Custom_UploadNewFile extends LightningElement {
         helpText: 'Choose Create a new file for insert new document, or Replace a file and select which one will be replaced'
     };
 
-
-    replaceObject = [
-        {
-            'label':  'Content Document', 
-            'APIName': 'ContentDocument', 
-            'fields':'Description,FileExtension',
-            'displayFields':'Title,FileType', 
-            'iconName': 'standard:document',
-            'FilterCondition' : 'Title != NULL',
-            'enabled' : true,
-            'selected' : true
-        }
-    ];
-
     @track disabled = {
         backButton: true,
         saveButton: false,
@@ -109,6 +97,7 @@ export default class Custom_UploadNewFile extends LightningElement {
         resultIcon:         ''
     }
     assignSelected = 'me';
+
     @track entityValue;
 
 
@@ -258,51 +247,6 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.fileVars.attachedFile = false;
     }
 
-    /** LOOK UP SETUP */
-    // better option with custom metadata type
-    ObjectConfig = [ //Array of objects
-        {
-            'label':  'Contact', 
-            'APIName': 'Contact', 
-            'fields':'Name,FirstName,LastName,Email,Phone',
-            'displayFields':'Name,Phone,Email', 
-            'iconName': 'standard:contact',
-            'FilterCondition' : 'AccountId != NULL',
-            'enabled' : true,
-            'selected' : true
-        },
-        {
-            'label':  'Account', 
-            'APIName': 'Account', 
-            'fields':'Name',
-            'displayFields':'Name,AnnualRevenue,AccountNumber', 
-            'iconName': 'standard:account',  
-            'FilterCondition' : 'AccountNumber != NULL',
-            'enabled' : true,
-            'selected' : true
-        },
-        {
-            'label':  'User', 
-            'APIName': 'User', 
-            'fields':'Name,FirstName,LastName,Email',
-            'displayFields':'Name,Username', 
-            'iconName': 'standard:user',
-            'FilterCondition' : 'IsActive = true',
-            'enabled' : true,
-            'selected' : true
-        }, 
-        {
-            'label':  'Content Document', 
-            'APIName': 'ContentDocument', 
-            'fields':'Description,FileExtension',
-            'displayFields':'Title,FileType', 
-            'iconName': 'standard:document',
-            'FilterCondition' : 'Title != NULL',
-            'enabled' : true,
-            'selected' : true
-        }
-    ];
-
     /** when you select a record for assign */
     handleSelectRecord(event){
         console.log('handleSelectRecord');
@@ -340,12 +284,18 @@ export default class Custom_UploadNewFile extends LightningElement {
             this.settings.disableAssignRecord = !data.enableAssignRecord__c;
             this.settings.enablePreviewTypes = data.enablePreviewTypes__c;
             this.fileVars.fileMaxSize = data.fileSizeLimit__c;
-            console.log(this.settings.disableBackButton);
+            this.settings.objectConfig = JSON.parse(this.handleJSON(data.objectsToRetrieve__c));
+            this.settings.replaceConfig = JSON.parse(this.handleJSON(data.replaceObject__c));
+            console.log(JSON.stringify(this.settings.objectConfig));
         }else if(error){
             console.log(error);
         }
     };
+    handleJSON(string){
+        string = string.replaceAll('\'','"').replaceAll('\n','').replaceAll('\r', '');
 
+        return string;
+    }
     /** create options for entity picklist */
     getEntityOptions(){
         var returnObj = [];

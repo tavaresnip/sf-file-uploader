@@ -1,10 +1,9 @@
 <template>
     <div class="slds-p-around_small" style="margin: auto; text-align: center;">
-            <lightning-button variant={meVariant} name="me" label="Assign me" title="Non-primary action" onclick={handleClick} class="slds-m-around_small"></lightning-button>
+        <lightning-button variant={meVariant} name="me" label="Assign me" title="Non-primary action" onclick={handleClick} class="slds-m-around_small"></lightning-button>
 
-        <lightning-button variant={userVariant} name="user" label="Assign to an user" title="Non-primary action" onclick={handleClick} class="slds-m-around_small"></lightning-button>
+        <lightning-button disabled={settings.disableAssignUser} variant={userVariant} name="user" label="Assign to an user" title="Non-primary action" onclick={handleClick} class="slds-m-around_small"></lightning-button>
 
-        <lightning-button variant={recordVariant} name="record" label="Assign to a record" title="Non-primary action" onclick={handleClick} class="slds-m-around_small">
-        </lightning-button>
+        <lightning-button disabled={settings.disableAssignRecord} variant={recordVariant} name="record" label="Assign to a record" title="Non-primary action" onclick={handleClick} class="slds-m-around_small"></lightning-button>
     </div>
 </template>

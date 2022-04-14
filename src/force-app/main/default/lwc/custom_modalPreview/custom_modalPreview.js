@@ -68,6 +68,7 @@ export default class Custom_modalPreview extends LightningElement {
             composed   : true,
             cancelable : true,
             detail: {  
+                name: 'preview',
                 close: true
             }
         }); 

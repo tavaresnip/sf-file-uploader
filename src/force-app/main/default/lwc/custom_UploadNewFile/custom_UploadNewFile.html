@@ -18,8 +18,9 @@
                             </div>
                             
                         </div>
+                        
                         <!-- PILLS FOR FILE ATTACHED -->
-                        <template if:true={fileVars.attachedFile}><div class="slds-align_absolute-center"><lightning-badge  label={fileVars.fileName} icon-name="standard:file" onclick={removeFile} ></lightning-badge></div></template>
+                        <template if:true={fileVars.attachedFile}><div class="slds-align_absolute-center"><lightning-badge  label={fileVars.fileName} icon-name="standard:file" onclick={removeFile} ></lightning-badge></div></template>                              
                     </div>
                 </div>
 
@@ -60,7 +61,7 @@
                 <!-- FORTH STEP - ASSIGN RECORD --> 
                 <div if:true={visibleSteps.forthStep}>
                     <!-- CMP TO TOGGLE ASSIGNMENT TYPE -->
-                    <c-custom_assign-file onselect={onSelectAssignment} settings={settings}></c-custom_assign-file>    
+                    <c-custom_assign-file onselect={onSelectAssignment} settings={settings} assigned={assignSelected}></c-custom_assign-file>    
                     <!-- ENTITY TYPE SELECT AND LOOK UP FIELD -->
                     <div  if:true={show.lookUp} class="slds-box" style="position: static;">
                         <!-- COMBOBOX FOR SELECTING A ENTITY TYPE -->
@@ -85,6 +86,18 @@
                     </div>
                 </div>
 
+                <!-- FIFTH STEP -->
+                <div if:true={visibleSteps.fifthStep}>
+                    <c-custom-_load-csv file={fileVars.file} settings={settings}></c-custom-_load-csv>
+
+                    <!-- <div class="slds-align_absolute-center">
+                        <lightning-input style="margin: 3px" type="checkbox" label="Load as records" onchange={enableLoadCsv}></lightning-input>
+                        <div if:true={show.loadCsv}>
+                            <lightning-input style="margin: 3px" type="text" label="Select a file"></lightning-input>
+                            <lightning-button style="margin: 3px" variant={replaceFileButton.variant} label={replaceFileButton.label} title="Load CSV" icon-name={replaceFileButton.icon} onclick={toggleLoadCsv}></lightning-button>
+                        </div>    
+                    </div> -->
+                </div>
                 <!-- FINISH STEP -->
                 <div if:true={visibleSteps.finishStep} class="slds-notify_container slds-is-relative">
                     <div class={result.resultClass}  role="status">
@@ -131,5 +144,4 @@
     <div if:true={show.previewModal}>
         <c-custom-_modal-preview onclose={closePreview} file={fileVars.file}></c-custom-_modal-preview>
     </div>
-    <!-- MODAL PREVIEW -->
 </template>

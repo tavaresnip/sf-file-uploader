@@ -1,0 +1,134 @@
+<template >
+    <div if:true={show.loadCsv}>
+        <div class="slds-align_absolute-center">
+
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="12" padding="around-small" class="slds-align_absolute-center"> 
+                    <lightning-input style="margin: 3px" type="checkbox" label="Load as records" onchange={enableLoadCsv}></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" padding="around-small">
+                    <div if:true={show.loadCsvSetup}>
+                        <lightning-layout multiple-rows >
+                            <lightning-layout-item size="12" class="slds-align_absolute-center" padding="around-small" style="display: flex"> 
+                                <lightning-input onchange={toggleChangeDelimiter} style="width: auto;" type="toggle" label="Change Delimiter"></lightning-input>
+                                <lightning-input onchange={changeDelimiter} style="margin-left: 2%;width: 10%;" value={settings.delimiter} type="text" variant="label-hidden" disabled={disabled.changeDelimiter}></lightning-input>
+                            </lightning-layout-item>
+                            <!-- <lightning-layout-item size="6" padding="around-small"> 
+                                
+                            </lightning-layout-item> -->
+                            <lightning-layout-item size="12" padding="around-small" class="slds-align_absolute-center"> 
+                                <lightning-button style="margin: 3px" variant="brand" label="Setup Records" title="Setup Records to Load" icon-name="utility:setup" onclick={toggleLoadCsv}></lightning-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                        
+                    </div>    
+                </lightning-layout-item>
+            </lightning-layout>
+
+
+           
+            
+        </div>
+    </div>
+
+    <div if:true={show.dataTableModal}>
+    <section  role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-labelledby="modal-heading-01" aria-modal="true" >
+        <div class="slds-modal__container">
+            <button name="mainModal" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={closeModal}>
+                <lightning-icon data-name="mainModal" class="whitebutton" icon-name="utility:close" alternative-text="Close" title="Close"></lightning-icon>
+            </button>
+            <div class="slds-modal__header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{file.name}</h1>
+            </div>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="height:100vh;" >
+                <div style="text-align: center;">
+                        <lightning-datatable
+                        key-field="id"
+                        data={csv.dataTableData}
+                        columns={csv.dataTableColumns}
+                        onrowselection={getSelectedRow}>
+                    </lightning-datatable>
+                    <div style="margin-top: 15px; " class="slds-align_absolute-center">
+                            <lightning-combobox style="width: 10%; margin-right: 2%;"
+                                variant="label-hidden"
+                                value={selectedObject}
+                                options={objectListPickList}
+                                onchange={changeObjectList}>
+                            </lightning-combobox>
+                        <lightning-button  variant="brand" label="Assign Fields" title="Replace an existing file" onclick={openAssignField}></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </div>
+
+    <!-- SELECT FIELDS -->
+    <div if:true={show.assignField}>
+        <section  role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" aria-labelledby="modal-heading-01" aria-modal="true" >
+            <div class="slds-modal__container">
+                <button data-name="assignField" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={closeModal}>
+                    <lightning-icon data-name="assignField" class="whitebutton" icon-name="utility:close" alternative-text="Close" title="Close"></lightning-icon>
+                </button>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate">Assign each column to a unique field</h1>
+                </div>
+                <!-- ALERT MESAGE --> 
+                <div class={requiredFieldAlert.class} role="alert">
+                    <lightning-icon style="margin-right: 4px;" size="xx-small" variant={requiredFieldAlert.variant} data-name="mainModal" class="whitebutton" icon-name={requiredFieldAlert.icon} alternative-text="Close" title="Close"></lightning-icon>
+
+                    <h2>{requiredFieldAlert.message}</h2>
+                    
+                  </div>
+                <!-- ALERT MESAGE -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2" style="height:100vh;" >
+                    <div>
+                        <template for:each={csv.dataTableColumns} for:item="field">
+                            <div key={field.index}>
+                                <lightning-layout multiple-rows key={field.index}>
+                                <lightning-layout-item size="5" padding="around-small" >
+                                        <lightning-combobox
+                                            variant="label-hidden"
+                                            placeholder={field.label}
+                                            value={field.value}
+                                            options={csv.dataTableColumns}
+                                            disabled >
+                                        </lightning-combobox>
+                                </lightning-layout-item >
+                                <lightning-layout-item size="1" padding="around-small">
+                                    <div>
+                                        <lightning-icon icon-name="utility:forward" alternative-text="Close" title="Close"></lightning-icon>
+                                    </div>
+                                </lightning-layout-item >
+                                <lightning-layout-item size="6" padding="around-small">
+                                    <lightning-combobox 
+                                        variant="label-hidden"
+                                        data-id={field.fieldName}
+                                        data-index={field.index}    
+                                        value={field.apiName}
+                                        placeholder={field.apiName}
+                                        options={availableFields}
+                                        onchange={selectField}
+                                        >
+                                    </lightning-combobox>
+                                </lightning-layout-item>
+                                <!-- <lightning-layout-item size="1" padding="around-small">
+                                    <div>
+                                        <lightning-icon size="small" icon-name="utility:recycle_bin_empty" alternative-text="Close" title="Close"></lightning-icon>
+                                    </div>
+                                </lightning-layout-item > -->
+                            </lightning-layout>
+                        </div>
+                        
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </div>
+
+</template>

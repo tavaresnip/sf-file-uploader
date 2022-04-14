@@ -7,8 +7,9 @@ public without sharing class CNT_SearchLookUpRecords {
     
     public static final String USER_DEV_NAME = 'userPermission';
 
-    public static final Integer permissionSetMax = 10;
-
+    public static final Set<String> AUTO_POPULATED_FIELDS = new Set<String>{'OwnerId', 'IsCustomerPortal'};
+    public static final Integer MAX_PERM_SET = 10;
+    public static final String ALLOW_OBJECTS = 'All records able To';
     @AuraEnabled(cacheable=True)
     public static string searchObjects(String objectsConfig, Object searchTerm){
             System.debug([SELECT Id FROM Contact LIMIT 5]);
@@ -173,19 +174,21 @@ public without sharing class CNT_SearchLookUpRecords {
 
     @AuraEnabled(cacheable = true)
     public static cmp_advImporterSettings__c getComponentSettings(){
-        uploaderCmpSettings__c settings = uploaderCmpSettings__c.getInstance();
         String query = ' SELECT ' + getQueryFields() + ' FROM cmp_advImporterSettings__c WHERE ' + getQueryConditions() + ' ORDER BY prioritySettings__c ASC';
         System.debug(query);
         List<cmp_advImporterSettings__c> settingsList = Database.query(query);
         if(!settingsList.isEmpty()){
+            adjustCsvSettings(settingsList[0]);
             return settingsList[0];
         }
 
-        return new cmp_advImporterSettings__c();
-
-        
+        return new cmp_advImporterSettings__c();     
     }
-    
+    public static void adjustCsvSettings(cmp_advImporterSettings__c settings){
+        if(settings.recordsAllowedToImport__c == ALLOW_OBJECTS){
+            settings.selectedFieldsToImport__c = String.join(getSObjectList(), ';');
+        }
+    }
     public static List<Schema.FieldSetMember> getFields() {
         return SObjectType.cmp_advImporterSettings__c.FieldSets.fieldsForRetrieve.getFields();
     }
@@ -204,7 +207,7 @@ public without sharing class CNT_SearchLookUpRecords {
         String profileId = UserInfo.getProfileId();
         String idCondition = ' User__c = \'' + userId + '\' ';
         String profileCondition = ' User__r.Profile.Id = \'' + profileId + '\' ';
-        String orgWide = ' RecordType.Name = \'permissionSet\' ';
+        String orgWide = ' RecordType.DeveloperName = \'' + ORG_WIDE_DEV_NAME + '\' ';
         List<PermissionSetAssignment> permSet = [SELECT PermissionSet.Name FROM PermissionSetAssignment WHERE AssigneeId =: userId AND PermissionSet.Name IN: getPermissionSetList() ORDER BY PermissionSet.Name ASC];
         System.debug(permSet);
         String permSetCondition = '';
@@ -213,16 +216,66 @@ public without sharing class CNT_SearchLookUpRecords {
             for(PermissionSetAssignment pset : permSet){
                     permSetNames.add(pset.PermissionSet.Name);
             }
-            permSetCondition = 'permissionSetName__c IN (\'' + String.join(permSetNames, '\',\'') + '\') ';
+            permSetCondition = 'OR permissionSetName__c IN (\'' + String.join(permSetNames, '\',\'') + '\') ';
             System.debug(permSetCondition);
         }
-        return ' ' + idCondition + ' OR ' + profileCondition + ' OR ' + orgWide + ' OR ' + permSetCondition;
+        return ' ' + idCondition + ' OR ' + profileCondition + ' OR ' + orgWide + permSetCondition;
     }
+
     public static Set<String> getPermissionSetList(){
         Set<String> setString = new Set<String>();
-        for(Integer i = 1; i <= permissionSetMax ; i++){
+        for(Integer i = 1; i <= MAX_PERM_SET ; i++){
            setString.add('advImpWiz' + i);     
         }
         return setString;
+    }
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Object> getObjectFields(String objectApiName){
+        if(objectApiName == '' || objectApiName == null){
+            return new Map<String, Object>{'null' => objectApiName};
+        }
+        Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
+        Map<String, Schema.SObjectField> objectFieldsMap = globalDescribe.get(objectApiName).getDescribe().fields.getMap();
+        Map<String, Object> returnMap = new Map<String, Object>();
+
+        for(Schema.SObjectField field: objectFieldsMap.values()){
+            Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+            Map<String, String> fieldMap = new Map<String, String>();
+
+            System.debug(String.valueOf(fieldDescribe.getName()) + ' : ' + fieldDescribe.isCreateable());
+            if(fieldDescribe.isCreateable() ) {
+                fieldMap.put('apiname', String.valueOf(fieldDescribe.getName()));
+                if(!isRequired(fieldDescribe) || AUTO_POPULATED_FIELDS.contains(String.valueOf(fieldDescribe.getName())) ){
+                    fieldMap.put('label',  String.valueOf(fieldDescribe.getLabel()));
+                }else{
+                    fieldMap.put('label',  '*  ' + String.valueOf(fieldDescribe.getLabel()));
+                }
+                fieldMap.put('type', String.valueOf(fieldDescribe.getType()));
+                returnMap.put(fieldDescribe.getName(), fieldMap);
+            }
+        }
+        return returnMap;
+    }
+
+    public static Boolean isRequired(DescribeFieldResult describeFieldResult) {
+        return describeFieldResult.isCreateable() && !describeFieldResult.isNillable() && describeFieldResult.getType() != DisplayType.BOOLEAN;
+    }
+    public static List<String> getSObjectList(){
+        List<string> sObjectList = new List<string>();
+
+        for(Schema.SObjectType objTyp : Schema.getGlobalDescribe().Values()){
+            String name = objTyp.getDescribe().getName();
+            // Exclude all the unwanted Sobjects e.g. History, Share etc..
+
+            if((!name.containsignorecase('history') && !name.containsignorecase('tag')&&
+                !name.containsignorecase('share') && !name.containsignorecase('feed')) || 
+                name.toLowerCase().right(3) ==  '__c'){      
+                sObjectList.add(name);
+                System.debug( 'Name : ' + name);
+            }
+
+        }
+
+        return sObjectList;
     }
 }

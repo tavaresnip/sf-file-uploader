@@ -10,7 +10,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     
     
     /** ENTITY */
-    @track entityOptions;
+    // @track entityOptions;
     @track dataTableColumns = [];
 
     @track dataTableData =  [];
@@ -21,7 +21,8 @@ export default class Custom_UploadNewFile extends LightningElement {
         {label: 'Preview File', value: 1,show: true},
         {label: 'Insert or replace', value: 2, show: true},
         {label: 'Assignment', value: 3, show: true},
-        {label: 'Save File', value: 4, show: true}
+        {label: 'Load CSV', value: 4, show: true},
+        {label: 'Save File', value: 5, show: true}
     ]
 
     @api myRecordId;
@@ -37,8 +38,11 @@ export default class Custom_UploadNewFile extends LightningElement {
         disableAssignRecord: true,
         enablePreviewTypes: '',
         objectConfig: '',
-        replaceConfig: ''
-    };
+        replaceConfig: '',
+        delimiter: '',
+        csvObjectsAllowed: '',
+        csvObjectsPermission: ''
+        };
 
     @track fileVars = {
         file: null,
@@ -61,7 +65,8 @@ export default class Custom_UploadNewFile extends LightningElement {
         firstStep: true,
         secondStep: false,
         thirdStep: false,
-        forthStep: false 
+        forthStep: false,
+        fifthStep: false 
     };
     
     replaceFileButton = {
@@ -76,7 +81,8 @@ export default class Custom_UploadNewFile extends LightningElement {
         saveButton: false,
         nextButton: true,
         entityInput: false,
-        replaceInput: false
+        replaceInput: false,
+        
     };
 
     @track show = {
@@ -85,7 +91,9 @@ export default class Custom_UploadNewFile extends LightningElement {
         saveButton: false,
         previewModal: false,
         spinnerLoading: false,
-        lookUp: false
+        lookUp: false,
+        loadCsvModal: false,
+        loadCsv: false
     };
 
 
@@ -103,7 +111,7 @@ export default class Custom_UploadNewFile extends LightningElement {
 
     /** connectedCallback Function */
     connectedCallback(){
-        this.getEntityOptions();
+        // this.getEntityOptions();
         this.recordId = userId;
     }
 
@@ -208,9 +216,11 @@ export default class Custom_UploadNewFile extends LightningElement {
         this.visibleSteps.secondStep = false;
         this.visibleSteps.thirdStep = false;
         this.visibleSteps.forthStep = false;
+        this.visibleSteps.fifthStep = false;
         this.disabled.backButton = this.settings.disableBackButton;
         this.disabled.nextButton = true;
         this.show.saveButton = false;
+        this.show.lookUp = false;
         switch (number){
             case 0:
             this.visibleSteps.firstStep = true;
@@ -230,6 +240,11 @@ export default class Custom_UploadNewFile extends LightningElement {
             this.disabled.nextButton = !(this.assignSelected == 'me') || ((this.assignSelected == 'record' || this.assignSelected == 'user') && this.recordId);
                 break;
             case 4:
+            this.show.nextButton = true;
+            this.show.backButton = true;
+            this.visibleSteps.fifthStep = true;
+                break;
+            case 5:
             this.show.saveButton = true;
             this.show.nextButton = false;
             this.show.backButton = false;
@@ -238,9 +253,9 @@ export default class Custom_UploadNewFile extends LightningElement {
         }
     }
 
-    hideCsv(){
-        this.uploadSteps[2].show = !this.uploadSteps[2].show;
-    }
+    // hideCsv(){
+    //     this.uploadSteps[2].show = !this.uploadSteps[2].show;
+    // }
 
     removeFile(){
         this.fileVars.fileName = null;
@@ -286,6 +301,9 @@ export default class Custom_UploadNewFile extends LightningElement {
             this.fileVars.fileMaxSize = data.fileSizeLimit__c;
             this.settings.objectConfig = JSON.parse(this.handleJSON(data.objectsToRetrieve__c));
             this.settings.replaceConfig = JSON.parse(this.handleJSON(data.replaceObject__c));
+            this.settings.delimiter = data.csvDelimiterCharacter__c;
+            this.settings.csvObjectsAllowed = data.selectedFieldsToImport__c;
+            this.settings.csvObjectsPermission = data.recordsAllowedToImport__c;
             console.log(JSON.stringify(this.settings.objectConfig));
         }else if(error){
             console.log(error);
@@ -297,14 +315,17 @@ export default class Custom_UploadNewFile extends LightningElement {
         return string;
     }
     /** create options for entity picklist */
-    getEntityOptions(){
+    get entityOptions(){
         var returnObj = [];
-        returnObj.push({ label: 'All list', value: 'all'});
-        for(const obj in this.ObjectConfig){
-            returnObj.push({ label: this.ObjectConfig[obj].label, value: this.ObjectConfig[obj].APIName});
-        }
-
-        this.entityOptions = returnObj;
+            console.log(JSON.stringify(this.settings.objectConfig));
+            returnObj.push({ label: 'All list', value: 'all'});
+            if(this.settings.objectConfig){
+                for(const obj in this.settings.objectConfig){
+                    console.log(this.settings.objectConfig[obj].label + ' - ' + this.settings.objectConfig[obj].APIName);
+                    returnObj.push({ label: this.settings.objectConfig[obj].label, value: this.settings.objectConfig[obj].APIName});
+                }
+            }
+        return returnObj;
     }
 
     /** onchange for entity type input */
@@ -315,20 +336,20 @@ export default class Custom_UploadNewFile extends LightningElement {
     /** Set a specific entity type for searching */
     updateEntitySelection(entitySelected){
         var allOption = this.entityOptions[0].value;
-        for(const option in this.ObjectConfig){
-            var itOption = this.ObjectConfig[option].APIName;
+        for(const option in this.settings.objectConfig){
+            var itOption = this.settings.objectConfig[option].APIName;
             if(entitySelected == allOption){
-                this.ObjectConfig[option].selected = true;
+                this.settings.objectConfig[option].selected = true;
             }else{ 
                 if(itOption == entitySelected){
-                    this.ObjectConfig[option].selected = true;
+                    this.settings.objectConfig[option].selected = true;
                 }else{
-                    this.ObjectConfig[option].selected = false;
+                    this.settings.objectConfig[option].selected = false;
                 }
             }
         }
 
-        console.log(JSON.stringify(this.ObjectConfig));
+        console.log(JSON.stringify(this.settings.objectConfig));
     }
 
     /** When selecting a entity to assign file */
@@ -457,8 +478,15 @@ export default class Custom_UploadNewFile extends LightningElement {
             this.show.previewModal = !this.show.previewModal;
         }
     }
-    closePreview(){
-        this.show.previewModal = false;
+    closePreview(event){
+        console.log(event.detail.name);
+        if(event.detail.name == 'preview'){
+            this.show.previewModal = false;
+        }else{
+            this.toggleLoadCsv();
+        }
+        
+        
     }
 
     showNotification(variant, title, msg) {
@@ -469,4 +497,11 @@ export default class Custom_UploadNewFile extends LightningElement {
         });
         this.dispatchEvent(evt);
     }
+    // enableLoadCsv(){
+    //     this.show.loadCsv = !this.show.loadCsv;
+    // }
+    /** CSV LOAD */
+    // toggleLoadCsv(){
+    //     this.show.loadCsvModal = !this.show.loadCsvModal;
+    // }
 }

@@ -6,12 +6,16 @@ export default class Custom_assignFile extends LightningElement {
     @track meVariant = 'brand';
     @track userVariant = 'neutral';
     @track recordVariant = 'neutral';
+    @api assigned;
     @api settings;
     handleClick(event){
         console.log(event.target.name);
         this.toggleBrand(event.target.name);
     }
-
+    connectedCallback(){
+        console.log('this.assignSelected ' + this.assigned);
+        this.toggleBrand(this.assigned);
+    }
     toggleBrand(button){
         this.meVariant = 'neutral';
         this.userVariant = 'neutral';
@@ -29,8 +33,7 @@ export default class Custom_assignFile extends LightningElement {
             default:
                 this.meVariant = 'brand';
                 button = 'me';
-                break;
-            
+                break;            
         }
         
 

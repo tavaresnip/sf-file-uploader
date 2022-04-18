@@ -18,7 +18,8 @@ export default class Custom_loadCsv extends LightningElement {
         loadCsvSetup: false
     }
     @track disabled = {
-        changeDelimiter: true
+        changeDelimiter: true,
+        removeDoubleQuotes: false
     }
 
     @track requiredFieldAlert = {
@@ -54,6 +55,7 @@ export default class Custom_loadCsv extends LightningElement {
 
         this.objectListPickList = this.sortFieldsListByName(this.objectListPickList);
     }
+
     verifyRequiredFieldsRemaining(){
         var remainingReqFields = this.availableFields.filter(field => {
             return field.label.charAt(0) == '*';
@@ -114,6 +116,19 @@ export default class Custom_loadCsv extends LightningElement {
         return 'unknown';
     }
 
+    removeDoubleQuotes(line){
+        if(this.disabled.removeDoubleQuotes){
+            if(line.charAt(0) == '"'){
+                line = line.substr(1);
+            }
+            if(line.charAt(line.length - 1) == '"'){
+                line = line.slice(0, -1);
+            }
+        }
+        console.log(line);
+        return line;
+    }
+
     /** create DB from String */
     convertCSVToDT(csvList){
         var i = 0;
@@ -124,18 +139,18 @@ export default class Custom_loadCsv extends LightningElement {
 
                 csvColumns = csvList[line].split(this.delimiter);
                 for(const column in csvColumns){
-                    
-                    var fieldName = csvColumns[column];
+                    csvColumns[column] = this.removeDoubleQuotes(csvColumns[column]);
+                    var fieldName = this.removeDoubleQuotes(csvColumns[column]);
                     this.csv.dataTableColumns.push({index: i, label: fieldName, fieldName: fieldName, apiName: '', value: fieldName});
                     i++;
                 }
             }else{
                 var csvLineTable = csvList[line].split(this.delimiter);
                 for(const lineField in csvLineTable){
-
                     if((lineField + 1 ) > csvColumns.length){
+                        var lineValue = this.removeDoubleQuotes(csvLineTable[lineField]);
                         this.csv.dataTableData[line - 1] = { ...this.csv.dataTableData[line - 1],
-                            [csvColumns[lineField]] : csvLineTable[lineField]
+                            [csvColumns[lineField]] : lineValue
                         };
 
                     }
@@ -251,10 +266,15 @@ export default class Custom_loadCsv extends LightningElement {
         console.log('this.delimiter :  ' + this.delimiter);
         this.show.dataTableModal = !this.show.dataTableModal;
     }
+
     changeDelimiter(event){
         console.log(event.target.value);
         console.log(JSON.stringify(this.settings));
 
         this.delimiter = event.target.value;
+    }
+    toggleRmvDoubleQuotes(event){
+        console.log(event.target.value);
+        this.disabled.removeDoubleQuotes = !this.disabled.removeDoubleQuotes;
     }
 }

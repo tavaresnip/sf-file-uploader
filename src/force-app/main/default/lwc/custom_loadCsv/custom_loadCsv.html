@@ -13,6 +13,9 @@
                                 <lightning-input onchange={toggleChangeDelimiter} style="width: auto;" type="toggle" label="Change Delimiter"></lightning-input>
                                 <lightning-input onchange={changeDelimiter} style="margin-left: 2%;width: 10%;" value={settings.delimiter} type="text" variant="label-hidden" disabled={disabled.changeDelimiter}></lightning-input>
                             </lightning-layout-item>
+                            <lightning-layout-item size="12" class="slds-align_absolute-center" padding="around-small" style="display: flex"> 
+                                <lightning-input onchange={toggleRmvDoubleQuotes} style="width: auto;" type="toggle" label="Remove Double Quotes"></lightning-input>
+                            </lightning-layout-item>
                             <!-- <lightning-layout-item size="6" padding="around-small"> 
                                 
                             </lightning-layout-item> -->

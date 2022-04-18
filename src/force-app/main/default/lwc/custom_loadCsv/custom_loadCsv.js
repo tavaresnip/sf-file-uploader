@@ -122,11 +122,6 @@ export default class Custom_loadCsv extends LightningElement {
             if(line.charAt(0) == '"'){
                 line = line.substr(1);
             }
-            console.log('-------------');
-            console.log('string length ' + line.length);
-            console.log('last ch ' + line.charAt(line.length - 1));
-            console.log('space ? ' + line.charAt(line.length - 1) == ' ');
-
             if(line.charAt(line.length - 1) == '"'){
                 line = line.slice(0, -1);
             }

@@ -260,6 +260,7 @@ export default class Custom_UploadNewFile extends LightningElement {
     removeFile(){
         this.fileVars.fileName = null;
         this.fileVars.attachedFile = false;
+        this.disabled.nextButton = true;
     }
 
     /** when you select a record for assign */

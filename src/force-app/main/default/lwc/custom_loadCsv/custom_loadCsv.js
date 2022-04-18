@@ -117,10 +117,16 @@ export default class Custom_loadCsv extends LightningElement {
     }
 
     removeDoubleQuotes(line){
+        line = line.trim();
         if(this.disabled.removeDoubleQuotes){
             if(line.charAt(0) == '"'){
                 line = line.substr(1);
             }
+            console.log('-------------');
+            console.log('string length ' + line.length);
+            console.log('last ch ' + line.charAt(line.length - 1));
+            console.log('space ? ' + line.charAt(line.length - 1) == ' ');
+
             if(line.charAt(line.length - 1) == '"'){
                 line = line.slice(0, -1);
             }
@@ -133,14 +139,15 @@ export default class Custom_loadCsv extends LightningElement {
     convertCSVToDT(csvList){
         var i = 0;
         for(const line in csvList){
+            console.log(csvList[line]);
             var csvColumns;
             if(line == 0){
                 this.csv.dataTableColumns = [];
 
                 csvColumns = csvList[line].split(this.delimiter);
                 for(const column in csvColumns){
-                    csvColumns[column] = this.removeDoubleQuotes(csvColumns[column]);
                     var fieldName = this.removeDoubleQuotes(csvColumns[column]);
+                    csvColumns[column] = fieldName;
                     this.csv.dataTableColumns.push({index: i, label: fieldName, fieldName: fieldName, apiName: '', value: fieldName});
                     i++;
                 }
@@ -175,6 +182,7 @@ export default class Custom_loadCsv extends LightningElement {
         })
         .then(result => {
             var csvList = [];
+            console.log(JSON.stringify(csvList));
             csvList = result.toString().split('\n');
             
             var tst = this.convertCSVToDT(csvList);         
@@ -273,6 +281,7 @@ export default class Custom_loadCsv extends LightningElement {
 
         this.delimiter = event.target.value;
     }
+
     toggleRmvDoubleQuotes(event){
         console.log(event.target.value);
         this.disabled.removeDoubleQuotes = !this.disabled.removeDoubleQuotes;

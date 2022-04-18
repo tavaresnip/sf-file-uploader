@@ -41,7 +41,7 @@
                 <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{file.name}</h1>
             </div>
             <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="height:100vh;" >
-                <div style="text-align: center;">
+                <div style="text-align: center; height: 95%;">
                         <lightning-datatable
                         key-field="id"
                         data={csv.dataTableData}
@@ -76,14 +76,14 @@
                 <div class="slds-modal__header">
                     <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate">Assign each column to a unique field</h1>
                 </div>
-                <!-- ALERT MESAGE --> 
+                <!-- ALERT MESSAGE --> 
                 <div class={requiredFieldAlert.class} role="alert">
                     <lightning-icon style="margin-right: 4px;" size="xx-small" variant={requiredFieldAlert.variant} data-name="mainModal" class="whitebutton" icon-name={requiredFieldAlert.icon} alternative-text="Close" title="Close"></lightning-icon>
 
                     <h2>{requiredFieldAlert.message}</h2>
                     
                   </div>
-                <!-- ALERT MESAGE -->
+                <!-- ALERT MESSAGE -->
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2" style="height:100vh;" >
                     <div>
                         <template for:each={csv.dataTableColumns} for:item="field">

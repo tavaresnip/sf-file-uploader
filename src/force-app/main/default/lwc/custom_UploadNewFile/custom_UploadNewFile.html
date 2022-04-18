@@ -115,26 +115,26 @@
                 
                 <!-- FOOTER-->
                 <div style=" text-align: center; margin-top: 20px;">  
-                        <!-- PROGRESS PATH STEPS -->
-                        <div style="width: 70%; display:inline-block; margin: 1%;">
-                            <lightning-progress-indicator current-step={currentStep} type="base" variant="base">
-                                <template for:each={uploadSteps} for:item="step">
-                                    <template key={step.label} if:true={step.show}>
-                                        <lightning-progress-step label={step.label} value={step.value} key={step.label}></lightning-progress-step>
-                                    </template>
+                    <!-- PROGRESS PATH STEPS -->
+                    <div style="width: 70%; display:inline-block; margin: 1%;">
+                        <lightning-progress-indicator current-step={currentStep} type="base" variant="base">
+                            <template for:each={uploadSteps} for:item="step">
+                                <template key={step.label} if:true={step.show}>
+                                    <lightning-progress-step label={step.label} value={step.value} key={step.label}></lightning-progress-step>
                                 </template>
-                            </lightning-progress-indicator>  
-                        </div>        
-                        <!-- NEXT & BACK BUTTON -->
-                        <div style="padding: 5px; " if:true={show.nextButton}>
-                            <lightning-button if:false={settings.hideBackButton} style="margin: 5px;" variant="neutral" name="back" label="Back" onclick={changeStep} disabled={disabled.backButton}></lightning-button>
-                            <lightning-button style="margin: 5px;" variant="brand" name="next" label="Next" onclick={changeStep} disabled={disabled.nextButton}></lightning-button>
-                        </div>
-                        <!-- SAVE BUTTON -->
-                        <div style="padding: 5px" if:true={show.saveButton}>
-                            <lightning-button variant="brand" name="save" label="Save" title="Save your file" onclick={saveFile} disabled={disabled.saveButton}></lightning-button>
-                            <lightning-helptext name="textAssign" style="margin-left: 5px; margin-top: 2px;" content={entityHelpText}></lightning-helptext>
-                        </div>
+                            </template>
+                        </lightning-progress-indicator>  
+                    </div>        
+                    <!-- NEXT & BACK BUTTON -->
+                    <div style="padding: 5px; " if:true={show.nextButton}>
+                        <lightning-button if:false={settings.hideBackButton} style="margin: 5px;" variant="neutral" name="back" label="Back" onclick={changeStep} disabled={disabled.backButton}></lightning-button>
+                        <lightning-button style="margin: 5px;" variant="brand" name="next" label="Next" onclick={changeStep} disabled={disabled.nextButton}></lightning-button>
+                    </div>
+                    <!-- SAVE BUTTON -->
+                    <div style="padding: 5px" if:true={show.saveButton}>
+                        <lightning-button variant="brand" name="save" label="Save" title="Save your file" onclick={saveFile} disabled={disabled.saveButton}></lightning-button>
+                        <lightning-helptext name="textAssign" style="margin-left: 5px; margin-top: 2px;" content={entityHelpText}></lightning-helptext>
+                    </div>
                 </div>
                 
             </lightning-card>

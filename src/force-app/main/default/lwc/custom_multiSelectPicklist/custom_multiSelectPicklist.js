@@ -126,7 +126,7 @@ export default class Custom_multiSelectPicklist extends LightningElement {
         // }
         @api index;
         handleOption(event, value){
-            console.log(this.value);
+            console.log(JSON.stringify(this.value));
             let listBoxOption = event.currentTarget.firstChild;
             if (listBoxOption.classList.contains("slds-is-selected")) {
                 this.value = this.value.filter(option => option.value !== value);
@@ -140,7 +140,7 @@ export default class Custom_multiSelectPicklist extends LightningElement {
             if (this.value.length > 1) {
                 this.inputValue = this.value.length + ' options selected';
             }
-            else if (this.value.length <= 1) {
+            else if (this.value.length === 1) {
                 this.inputValue = this.value[0].label;
             }
             else {

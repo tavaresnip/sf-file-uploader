@@ -29,7 +29,7 @@ export default class Custom_multiSelectPicklist extends LightningElement {
     */
 
 
-        @api label = "Default label";
+        // @api label = "Default label";
         _disabled = false;
         @api
         get disabled(){
@@ -56,7 +56,7 @@ export default class Custom_multiSelectPicklist extends LightningElement {
             }
 
             this.inputOptions = options.concat(value);
-            this.sortFieldsListByName(this.inputOptions);
+            // this.sortFieldsListByName(this.inputOptions);
         }
         @api
         clear(){
@@ -140,7 +140,7 @@ export default class Custom_multiSelectPicklist extends LightningElement {
             if (this.value.length > 1) {
                 this.inputValue = this.value.length + ' options selected';
             }
-            else if (this.value.length === 1) {
+            else if (this.value.length <= 1) {
                 this.inputValue = this.value[0].label;
             }
             else {
@@ -168,7 +168,6 @@ export default class Custom_multiSelectPicklist extends LightningElement {
         sortFieldsListByName(list){
 
             return list.sort((a, b) => a.label.localeCompare(b.label));
-            // this.availableFields = this.availableFields.sort((a, b) => a.label.localeCompare(b.label));
-            // this.allFields = this.allFields.sort((a, b) => a.label.localeCompare(b.label));
+
         }
 }

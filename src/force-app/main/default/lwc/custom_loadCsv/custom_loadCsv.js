@@ -143,7 +143,7 @@ export default class Custom_loadCsv extends LightningElement {
                 for(const column in csvColumns){
                     var fieldName = this.removeDoubleQuotes(csvColumns[column]);
                     csvColumns[column] = fieldName;
-                    this.csv.dataTableColumns.push({index: i, label: fieldName, fieldName: fieldName, apiName: '', value: fieldName});
+                    this.csv.dataTableColumns.push({index: i, label: fieldName, fieldName: fieldName, apiName: [], value: fieldName});
                     i++;
                 }
             }else{
@@ -228,24 +228,27 @@ export default class Custom_loadCsv extends LightningElement {
         refreshApex(this.fieldData);
         this.verifyRequiredFieldsRemaining();
     }
-
-    selectField(event){
-        console.log(JSON.stringify(this.selectedFields));
-        console.log('0' + JSON.stringify(this.csv.dataTableColumns));
+    changeField(event){
+        this.selectField(event.target.value, event.target.dataset.index);
+    }
+    selectField(index, values){
+        console.log('0' + JSON.stringify(this.selectedFields));
+        console.log('1' + JSON.stringify(this.csv.dataTableColumns));
 
         this.csv.dataTableColumns = this.csv.dataTableColumns.map(field => {
-            if(field.index == event.target.dataset.index){
-                this.selectedFields = this.selectedFields.filter(value => value != field.apiName);
-                return {...field, apiName: event.target.value};
+            if(field.index == index){
+                this.selectedFields = this.selectedFields.filter(value => !field.apiName.includes(value));
+                return {...field, apiName: values};
             }
             return field;
         });
-        this.selectedFields.push(event.target.value);
+        console.log('2 ' + JSON.stringify(values));
+        console.log('3 ' + JSON.stringify(this.selectedFields));
+        this.selectedFields = this.selectedFields.concat(values);
+        console.log('4 ' + JSON.stringify(this.selectedFields));
         this.availableFields = this.allFields.filter(field => !this.selectedFields.includes(field.value));
         this.availableFields = this.sortFieldsListByName(this.availableFields); 
         this.allFields = this.sortFieldsListByName(this.allFields);
-        console.log('1' + JSON.stringify(this.csv.dataTableColumns));
-
         this.verifyRequiredFieldsRemaining();
     }
 
@@ -280,5 +283,10 @@ export default class Custom_loadCsv extends LightningElement {
     toggleRmvDoubleQuotes(event){
         console.log(event.target.value);
         this.disabled.removeDoubleQuotes = !this.disabled.removeDoubleQuotes;
+    }
+
+    handleValueChange(event){
+        console.log(JSON.stringify(event.detail));
+        this.selectField( event.detail.index, event.detail.values);
     }
 }

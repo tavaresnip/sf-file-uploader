@@ -107,16 +107,23 @@
                                     </div>
                                 </lightning-layout-item >
                                 <lightning-layout-item size="6" padding="around-small">
-                                    <lightning-combobox 
+                                    <!-- <lightning-combobox 
                                         variant="label-hidden"
                                         data-id={field.fieldName}
                                         data-index={field.index}    
                                         value={field.apiName}
                                         placeholder={field.apiName}
                                         options={availableFields}
-                                        onchange={selectField}
+                                        onchange={changeField}
                                         >
-                                    </lightning-combobox>
+                                    </lightning-combobox> -->
+                                    <c-custom_multi-select-picklist 
+                                    if:true={availableFields} 
+                                    index={field.index}
+                                    options={availableFields}
+                                    onvaluechange={handleValueChange} 
+                                    label="Industry"
+                                    ></c-custom_multi-select-picklist>
                                 </lightning-layout-item>
                                 <!-- <lightning-layout-item size="1" padding="around-small">
                                     <div>
